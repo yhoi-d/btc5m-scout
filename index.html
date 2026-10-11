@@ -1,134 +1,26 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.svg">
-<title>BTC 5m Scout — Paper Trading</title>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><title>BTC 5M Predictor</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#131b2e;--line:#26334d;--text:#edf3ff;--muted:#a6b3cc;--green:#42d392;--red:#ff6b78;--yellow:#ffd166;--blue:#75a7ff}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(1000px 500px at 50% -10%,#1c2b4c 0%,var(--bg) 65%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:760px;margin:auto;padding:18px 14px 36px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.brand{font-weight:800;font-size:19px;letter-spacing:.2px}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--yellow);background:#221f22}
-.panel{background:linear-gradient(145deg,rgba(23,33,55,.96),rgba(16,23,40,.98));border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 12px 30px #0002}
-.label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}.price{font-size:clamp(30px,8vw,43px);font-weight:800;letter-spacing:-1.5px;margin:5px 0}.change{font-size:13px;color:var(--muted)}.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#0d1425;border:1px solid #24314a;border-radius:13px;padding:12px}.metric strong{display:block;font-size:18px;margin-top:5px}.signal{display:flex;align-items:center;gap:12px;margin:12px 0}.signalIcon{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:#252b3b;font-size:25px}.signalTitle{font-size:22px;font-weight:850}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}.muted{color:var(--muted)}.bar{height:9px;background:#28344a;border-radius:99px;overflow:hidden;margin:9px 0}.bar span{height:100%;display:block;width:0;background:var(--blue);transition:width .3s}.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{border:1px solid #33435f;background:#1c2942;color:var(--text);padding:11px 14px;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer}button.primary{background:#3159a8;border-color:#4776cf}button:disabled{opacity:.5}select{background:#0d1425;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px}ul{padding-left:20px;margin:10px 0}li{margin:6px 0;color:#d3def2}.notice{border-left:3px solid var(--yellow);padding:10px 12px;background:#29261e;border-radius:7px;color:#f4e4b6;font-size:13px;line-height:1.45}.status{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}.log{max-height:250px;overflow:auto}.logrow{border-top:1px solid var(--line);padding:9px 0;font-size:13px;display:flex;justify-content:space-between;gap:10px}.foot{font-size:12px;color:var(--muted);line-height:1.5;text-align:center;padding:12px}
-@media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style>
-</head>
-<body>
-<main>
- <div class="top"><div><div class="brand">◈ BTC 5m Scout</div><div class="muted" style="font-size:12px">Analista de señales · Android</div></div><div class="pill">MODO SIMULACIÓN</div></div>
-
- <section class="panel">
-  <div class="row"><div class="label">BTC / USDT · Binance Spot</div><div id="liveState" class="muted" style="font-size:12px">Conectando…</div></div>
-  <div class="price" id="price">—</div><div class="change" id="updated">Esperando datos públicos del mercado</div>
-  <div class="grid" style="margin-top:15px">
-   <div class="metric"><span class="label">RSI (14)</span><strong id="rsi">—</strong></div>
-   <div class="metric"><span class="label">Tendencia EMA</span><strong id="trend">—</strong></div>
-   <div class="metric"><span class="label">Impulso 5m</span><strong id="momentum">—</strong></div>
-   <div class="metric"><span class="label">Volatilidad</span><strong id="volatility">—</strong></div>
-  </div>
- </section>
-
- <section class="panel">
-  <div class="label">Evaluación del siguiente intervalo de 5 minutos</div>
-  <div class="signal"><div class="signalIcon" id="signalIcon">…</div><div><div class="signalTitle" id="signal">Analizando</div><div class="muted" id="signalSub">Aún no hay suficientes datos</div></div></div>
-  <div class="row"><span class="muted">Puntaje técnico de señal</span><strong id="score">—</strong></div>
-  <div class="bar"><span id="scoreBar"></span></div>
-  <div class="row"><span class="muted">Umbral configurado</span><strong>80/100</strong></div>
-  <div id="reason" class="status">El sistema esperará datos suficientes antes de emitir una señal.</div>
-  <div class="btns"><button class="primary" id="refresh">Actualizar análisis</button><button id="notify">Activar avisos</button><button id="saveSignal">Registrar señal simulada</button></div>
-  <div class="status" id="notifyStatus">Los avisos del navegador dependen de los permisos y de que la aplicación esté abierta.</div>
- </section>
-
- <section class="panel">
-  <div class="row"><div><div class="label">Laboratorio de pruebas</div><div style="font-weight:800;font-size:18px;margin-top:4px">Seguimiento de predicciones</div></div><div class="pill">Sin dinero real</div></div>
-  <p class="muted" style="font-size:13px;line-height:1.5">Registra la dirección sugerida y compara el precio actual con el precio aproximadamente 5 minutos después. Esta prueba básica no modela pagos, comisiones ni reglas de una plataforma externa.</p>
-  <div class="grid">
-   <div class="metric"><span class="label">Señales guardadas</span><strong id="total">0</strong></div>
-   <div class="metric"><span class="label">Resueltas</span><strong id="resolved">0</strong></div>
-   <div class="metric"><span class="label">Aciertos</span><strong id="wins">0</strong></div>
-   <div class="metric"><span class="label">Tasa observada</span><strong id="winrate">—</strong></div>
-  </div>
-  <div class="btns"><button id="resolve">Resolver vencidas</button><button id="export">Exportar CSV</button><button id="clear">Borrar historial</button></div>
-  <div class="log" id="log" style="margin-top:12px"></div>
- </section>
-
- <section class="panel">
-  <div class="label">Cómo interpreta la señal</div>
-  <ul>
-   <li>Consulta velas públicas de 1 minuto y precio actual de BTC/USDT.</li>
-   <li>Combina tendencia EMA, RSI, impulso reciente y volatilidad.</li>
-   <li>Solo considera una alerta si el puntaje llega a 80/100 y los filtros no detectan condiciones desfavorables.</li>
-   <li>El puntaje <b>no es una probabilidad de ganar</b>. Hace falta validarlo con muchas predicciones fuera de muestra.</li>
-  </ul>
-  <div class="notice">No conectes claves API ni deposites dinero para usar esta versión. No ejecuta órdenes. En predicciones binarias de terceros, el resultado y el pago dependen de las reglas exactas de esa plataforma; este panel no garantiza que una señal sea operable allí.</div>
- </section>
- <div class="foot">Versión 1 · Datos públicos de mercado · No es asesoría financiera · Mantén la app abierta para refrescar datos y recibir avisos.</div>
-</main>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#131b2e;--line:#26334d;--text:#edf3ff;--muted:#a6b3cc;--green:#42d392;--red:#ff6b78;--yellow:#ffd166;--blue:#75a7ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(1000px 500px at 50% -10%,#1c2b4c 0%,var(--bg) 65%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:780px;margin:auto;padding:16px 13px 35px}.top,.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.top{margin-bottom:14px}.brand{font-size:20px;font-weight:850}.muted,.status{color:var(--muted)}.muted{font-size:13px}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:11px;color:var(--yellow)}.panel{background:linear-gradient(145deg,#172137f5,#101728fa);border:1px solid var(--line);border-radius:18px;padding:15px;margin:12px 0;box-shadow:0 12px 30px #0002}.label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}.price{font-size:clamp(31px,8vw,44px);font-weight:850;letter-spacing:-1px;margin:5px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{background:#0d1425;border:1px solid #24314a;border-radius:12px;padding:11px;min-width:0}.metric strong{display:block;font-size:18px;margin-top:5px;overflow-wrap:anywhere}.signal{font-size:clamp(26px,7vw,38px);font-weight:900;margin:8px 0}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}.blue{color:var(--blue)}.bar{height:9px;background:#28344a;border-radius:99px;overflow:hidden;margin:9px 0}.bar span{display:block;height:100%;width:0;background:var(--blue);transition:width .3s}.status{font-size:12px;line-height:1.5;margin-top:8px}.countdown{font-size:28px;font-weight:850;font-variant-numeric:tabular-nums}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:1px solid #33435f;background:#1c2942;color:var(--text);padding:10px 13px;border-radius:10px;font-weight:700;cursor:pointer}button.primary{background:#3159a8;border-color:#4776cf}.notice{border-left:3px solid var(--yellow);padding:10px 12px;background:#29261e;border-radius:7px;color:#f4e4b6;font-size:13px;line-height:1.5}.log{max-height:270px;overflow:auto}.logrow{border-top:1px solid var(--line);padding:9px 0;font-size:13px;display:flex;justify-content:space-between;gap:8px}.foot{text-align:center;font-size:11px;color:var(--muted);padding:12px;line-height:1.5}@media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style></head><body><main>
+<div class="top"><div><div class="brand">◈ BTC 5M Predictor</div><div class="muted">Predicción continua por velas exactas de 5 minutos</div></div><div class="pill">SIMULACIÓN</div></div>
+<section class="panel"><div class="row"><div class="label">BTC/USDT · Binance Spot</div><div id="live" class="muted">Conectando…</div></div><div id="price" class="price">—</div><div id="updated" class="muted">Esperando datos del mercado</div><div class="grid" style="margin-top:13px"><div class="metric"><span class="label">Inicio de esta vela</span><strong id="open">—</strong></div><div class="metric"><span class="label">Tiempo restante</span><strong id="countdown" class="countdown">—</strong></div><div class="metric"><span class="label">Cambio desde inicio</span><strong id="change">—</strong></div><div class="metric"><span class="label">Predicción actual</span><strong id="state">Calculando…</strong></div></div></section>
+<section class="panel"><div class="label">Predicción para el cierre de esta vela</div><div id="direction" class="signal">ESPERANDO DATOS</div><div class="row"><span class="muted">Confianza estimada del modelo</span><strong id="confidence">—</strong></div><div class="bar"><span id="confbar"></span></div><div class="row"><span class="muted">Calidad de evidencia histórica</span><strong id="evidence">Sin validar</strong></div><div id="why" class="status">La predicción se genera usando solo datos disponibles al inicio de cada vela.</div><div class="btns"><button id="refresh" class="primary">Actualizar ahora</button><button id="notify">Activar avisos</button><button id="export">Exportar historial CSV</button></div><div id="notifstatus" class="status">Para predicción automática continua, mantén abierta esta página. El navegador puede suspenderla en segundo plano.</div></section>
+<section class="panel"><div class="row"><div><div class="label">Pruebas automáticas</div><strong>Historial de velas cerradas</strong></div><div class="pill">Sin dinero real</div></div><p class="muted">El sistema registra una predicción por cada vela de 5 minutos y la evalúa cuando cierra esa vela, comparando el cierre con el precio de apertura. No necesita que pulses registrar.</p><div class="grid"><div class="metric"><span class="label">Predicciones cerradas</span><strong id="n">0</strong></div><div class="metric"><span class="label">Aciertos</span><strong id="wins">0</strong></div><div class="metric"><span class="label">Tasa observada</span><strong id="rate">—</strong></div><div class="metric"><span class="label">Últimas 20</span><strong id="recent">—</strong></div></div><div class="btns"><button id="clear">Borrar historial local</button></div><div id="log" class="log" style="margin-top:10px"></div></section>
+<section class="panel"><div class="label">Cómo leer el porcentaje</div><ul><li>La dirección se decide al comenzar cada vela de 5 minutos y no se cambia retroactivamente.</li><li>La confianza es una estimación heurística basada en alineación de tendencia, impulso, RSI y volatilidad; <b>no es una probabilidad garantizada ni una IA entrenada</b>.</li><li>La tasa observada es el porcentaje de aciertos de las predicciones ya cerradas. Las muestras pequeñas son muy inestables.</li><li>“Calidad de evidencia” depende del número de resultados acumulados; no significa que el mercado sea seguro.</li></ul><div class="notice">Este prototipo no opera ni recomienda una apuesta real. Un acierto direccional de Binance Spot puede no coincidir exactamente con el precio de liquidación de otra plataforma. Los datos pueden retrasarse y el navegador puede pausar la app.</div></section><div class="foot">Datos públicos de mercado · Actualización periódica · No es asesoría financiera</div></main>
 <script>
-const $=id=>document.getElementById(id);
-let candles=[], currentPrice=null, currentSignal=null, lastAlertKey="", refreshing=false;
-const KEY="btc5m_scout_history_v1";
-const fmt=n=>Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const signed=n=>(n>=0?"+":"")+n.toFixed(3)+"%";
-function ema(values,period){if(values.length<period)return null;let k=2/(period+1),v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(let i=period;i<values.length;i++)v=values[i]*k+v*(1-k);return v}
-function rsi(values,period=14){if(values.length<=period)return null;let gains=0,losses=0;for(let i=values.length-period;i<values.length;i++){let d=values[i]-values[i-1];if(d>=0)gains+=d;else losses-=d}if(losses===0)return 100;let rs=(gains/period)/(losses/period);return 100-100/(1+rs)}
-function getHistory(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
-function setHistory(a){localStorage.setItem(KEY,JSON.stringify(a));renderHistory()}
-function renderHistory(){let h=getHistory(),done=h.filter(x=>x.result!==null),wins=done.filter(x=>x.result==="WIN").length;$("total").textContent=h.length;$("resolved").textContent=done.length;$("wins").textContent=wins;$("winrate").textContent=done.length?Math.round(wins/done.length*100)+"%":"—";$("log").innerHTML=h.slice().reverse().slice(0,30).map(x=>`<div class="logrow"><span><b>${x.direction}</b> · ${new Date(x.time).toLocaleTimeString()}<br><span class="muted">${fmt(x.price)} → ${x.endPrice?fmt(x.endPrice):"pendiente"}</span></span><span>${x.result===null?"Pendiente":x.result==="WIN"?'<b class="green">ACIERTO</b>':'<b class="red">FALLO</b>'}</span></div>`).join("")||'<div class="muted">Todavía no hay señales guardadas.</div>'}
-async function fetchData(){
- if(refreshing)return;refreshing=true;$("liveState").textContent="Actualizando…";
- try{
-  const base="https://data-api.binance.vision";
-  const [p,k]=await Promise.all([
-   fetch(base+"/api/v3/ticker/price?symbol=BTCUSDT",{cache:"no-store"}),
-   fetch(base+"/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=100",{cache:"no-store"})
-  ]);
-  if(!p.ok||!k.ok)throw new Error("Binance respondió con error HTTP");
-  const pj=await p.json(),kj=await k.json();currentPrice=Number(pj.price);
-  candles=kj.map(x=>({time:x[0],open:+x[1],high:+x[2],low:+x[3],close:+x[4],volume:+x[5]}));
-  analyze();$("price").textContent="$"+fmt(currentPrice);$("updated").textContent="Actualizado: "+new Date().toLocaleTimeString()+" · fuente: datos públicos Binance";$("liveState").textContent="● En vivo";$("liveState").className="green";resolveDue();
- }catch(e){$("liveState").textContent="Sin conexión";$("liveState").className="red";$("reason").textContent="No se pudieron obtener datos. Comprueba internet o abre la app desde un sitio HTTPS. "+e.message;$("signal").textContent="SIN DATOS";$("signalIcon").textContent="!";$("signalSub").textContent="No se genera señal sin datos actualizados."}
- finally{refreshing=false}
-}
-function analyze(){
- const c=candles.map(x=>x.close);if(c.length<30)return;
- const r=rsi(c),e9=ema(c,9),e21=ema(c,21),e50=ema(c,50);
- const mom=(c[c.length-1]/c[c.length-6]-1)*100;
- const recent=candles.slice(-15),rets=[];for(let i=1;i<recent.length;i++)rets.push((recent[i].close/recent[i-1].close-1)*100);
- const vol=Math.sqrt(rets.reduce((s,x)=>s+x*x,0)/Math.max(1,rets.length));
- let bull=0,bear=0,notes=[];
- if(e9>e21){bull+=24;notes.push("EMA 9 sobre EMA 21")}else{bear+=24;notes.push("EMA 9 bajo EMA 21")}
- if(e21>e50){bull+=16;notes.push("tendencia EMA larga alcista")}else{bear+=16;notes.push("tendencia EMA larga bajista")}
- if(mom>0.035){bull+=22;notes.push("impulso positivo")}else if(mom<-.035){bear+=22;notes.push("impulso negativo")}
- if(r>52&&r<70){bull+=18;notes.push("RSI acompaña al alza")}else if(r<48&&r>30){bear+=18;notes.push("RSI acompaña a la baja")}
- if(candles[candles.length-1].volume>candles.slice(-11,-1).reduce((s,x)=>s+x.volume,0)/10){if(mom>0)bull+=10;else if(mom<0)bear+=10;notes.push("volumen reciente superior a su media")}
- let dir=bull>bear?"SUBIDA":bear>bull?"BAJADA":"ESPERAR";
- let score=Math.min(95,Math.max(50,50+Math.abs(bull-bear)*0.65));
- let blocked=[];
- if(vol>0.12)blocked.push("volatilidad elevada");
- if(r>=70||r<=30)blocked.push("RSI extremo");
- if(Math.abs(mom)<0.025)blocked.push("impulso débil");
- if(score<80)blocked.push("puntaje inferior a 80");
- if(dir==="ESPERAR")blocked.push("señales contradictorias");
- const valid=blocked.length===0;
- currentSignal={direction:dir,score:Math.round(score),valid,price:currentPrice,time:Date.now(),reasons:notes,blocked};
- $("rsi").textContent=r.toFixed(1);$("trend").textContent=e9>e21?"Alcista":"Bajista";$("trend").className=e9>e21?"green":"red";$("momentum").textContent=signed(mom);$("momentum").className=mom>=0?"green":"red";$("volatility").textContent=vol.toFixed(3)+"%";
- $("score").textContent=Math.round(score)+"/100";$("scoreBar").style.width=score+"%";$("scoreBar").style.background=score>=80?"var(--green)":"var(--blue)";
- $("signal").textContent=valid?"ALERTA "+dir:"NO ENTRAR";$("signal").className="signalTitle "+(valid?(dir==="SUBIDA"?"green":"red"):"yellow");$("signalIcon").textContent=valid?(dir==="SUBIDA"?"↗":"↘"):"⏸";
- $("signalSub").textContent=valid?"Puntaje alto; confirma con tu plataforma.":"Filtros de seguridad no cumplidos.";
- $("reason").textContent=(valid?"Condiciones técnicas alineadas: ":"Bloqueado: ")+(valid?notes.join(" · "):blocked.join(" · "))+". Esto no es una probabilidad calibrada.";
- if(valid){const key=Math.floor(Date.now()/300000)+dir;if(key!==lastAlertKey){lastAlertKey=key;if("Notification"in window&&Notification.permission==="granted")new Notification("BTC 5m Scout: "+dir,{body:"Puntaje técnico "+Math.round(score)+"/100. No es garantía de acierto."})}}
-}
-async function requestNotify(){if(!("Notification"in window)){$("notifyStatus").textContent="Este navegador no permite notificaciones web.";return}try{let p=await Notification.requestPermission();$("notifyStatus").textContent=p==="granted"?"Avisos permitidos mientras el navegador mantenga activa la app.": "Permiso de notificaciones no concedido."}catch(e){$("notifyStatus").textContent="No fue posible solicitar permiso en este navegador."}}
-function saveSignal(){if(!currentSignal||!currentPrice){alert("Espera a que carguen los datos.");return}if(!currentSignal.valid){if(!confirm("La señal actual es NO ENTRAR. ¿Quieres guardarla igualmente para evaluar el filtro?"))return}let h=getHistory();h.push({id:Date.now(),time:Date.now(),direction:currentSignal.direction,score:currentSignal.score,price:currentPrice,result:null,endPrice:null,resolveAt:Date.now()+5*60*1000});setHistory(h);$("notifyStatus").textContent="Señal guardada para revisión dentro de 5 minutos."}
-function resolveDue(){let h=getHistory(),changed=false;h=h.map(x=>{if(x.result===null&&Date.now()>=x.resolveAt&&currentPrice){x.endPrice=currentPrice;x.result=(x.direction==="SUBIDA"&&currentPrice>x.price)||(x.direction==="BAJADA"&&currentPrice<x.price)?"WIN":"LOSS";x.resolvedAt=Date.now();changed=true}return x});if(changed)setHistory(h)}
-function exportCSV(){let h=getHistory();if(!h.length){alert("No hay historial para exportar.");return}let rows=[["time","direction","technical_score","start_price","end_price","result"],...h.map(x=>[new Date(x.time).toISOString(),x.direction,x.score,x.price,x.endPrice??"",x.result??"PENDING"])];let csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(",")).join("\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="btc5m-scout.csv";a.click();URL.revokeObjectURL(a.href)}
-$("refresh").onclick=fetchData;$("notify").onclick=requestNotify;$("saveSignal").onclick=saveSignal;$("resolve").onclick=()=>{resolveDue();renderHistory()};$("export").onclick=exportCSV;$("clear").onclick=()=>{if(confirm("¿Borrar todo el historial de simulación?")){setHistory([])}};
-renderHistory();fetchData();setInterval(fetchData,15000);setInterval(resolveDue,15000);
-if ("serviceWorker" in navigator && location.protocol.startsWith("http")) { window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{})); }
-</script>
-</body>
-</html>
+const $=id=>document.getElementById(id), KEY='btc5m_predictor_v2_history';let candles5=[],candles1=[],price=null,activeId=null,lastPred=null,busy=false;
+const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});const pct=n=>(n>=0?'+':'')+n.toFixed(3)+'%';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}function save(h){localStorage.setItem(KEY,JSON.stringify(h));render()}
+function ema(a,p){if(a.length<p)return null;let k=2/(p+1),v=a.slice(0,p).reduce((s,x)=>s+x,0)/p;for(let i=p;i<a.length;i++)v=a[i]*k+v*(1-k);return v}
+function rsi(a,p=14){if(a.length<=p)return 50;let g=0,l=0;for(let i=a.length-p;i<a.length;i++){let d=a[i]-a[i-1];if(d>0)g+=d;else l-=d}if(l===0)return 100;return 100-100/(1+g/l)}
+function predict(atOpen,closed){let closes=closed.map(c=>c.close);if(closes.length<55)return {direction:'ESPERANDO DATOS',confidence:null,why:'Se necesitan al menos 55 velas cerradas para analizar tendencia.'};let e9=ema(closes.slice(-100),9),e21=ema(closes.slice(-100),21),e50=ema(closes.slice(-100),50),rr=rsi(closes),mom=(closes.at(-1)/closes.at(-6)-1)*100;let rets=[];for(let i=Math.max(1,closes.length-15);i<closes.length;i++)rets.push((closes[i]/closes[i-1]-1)*100);let vol=Math.sqrt(rets.reduce((s,x)=>s+x*x,0)/Math.max(1,rets.length));let bull=0,bear=0,why=[];if(e9>e21){bull+=1.3;why.push('EMA corta alcista')}else{bear+=1.3;why.push('EMA corta bajista')}if(e21>e50){bull+=1;why.push('tendencia larga alcista')}else{bear+=1;why.push('tendencia larga bajista')}if(mom>0.035){bull+=1.2;why.push('impulso positivo')}else if(mom<-.035){bear+=1.2;why.push('impulso negativo')}if(rr>52&&rr<68)bull+=.7;else if(rr<48&&rr>32)bear+=.7;let dir=bull===bear?'SIN VENTAJA':bull>bear?'SUBIR':'BAJAR';let strength=Math.abs(bull-bear);let confidence=dir==='SIN VENTAJA'?50:Math.round(Math.min(68,50+strength*5.0));if(vol>.18)confidence=Math.max(50,confidence-7);if(rr>=72||rr<=28)confidence=Math.max(50,confidence-5);if(Math.abs(mom)<.02)confidence=Math.max(50,confidence-4);return {direction:dir,confidence,why:why.join(' · ')+`. RSI ${rr.toFixed(1)}, impulso ${pct(mom)}, volatilidad ${vol.toFixed(3)}%.`}}
+function candleId(c){return String(c.time)}function render(){let h=load(),done=h.filter(x=>x.result==='WIN'||x.result==='LOSS'),wins=done.filter(x=>x.result==='WIN').length,last=done.slice(-20),rw=last.filter(x=>x.result==='WIN').length;$('n').textContent=done.length;$('wins').textContent=wins;$('rate').textContent=done.length?Math.round(wins/done.length*100)+'%':'—';$('recent').textContent=last.length?Math.round(rw/last.length*100)+'%':'—';$('evidence').textContent=done.length<30?'Muy baja':done.length<100?'Inicial':done.length<300?'Moderada':'Más amplia';$('log').innerHTML=h.slice().reverse().slice(0,30).map(x=>`<div class="logrow"><span><b>${x.direction}</b> · ${new Date(x.time).toLocaleTimeString()}<br><span class="muted">${fmt(x.open)} → ${x.close==null?'en curso':fmt(x.close)} · confianza ${x.confidence==null?'—':x.confidence+'%'}</span></span><span>${x.result==null?'<b class="yellow">EN CURSO</b>':x.result==='WIN'?'<b class="green">ACIERTO</b>':x.result==='LOSS'?'<b class="red">FALLO</b>':'<b class="muted">EMPATE</b>'}</span></div>`).join('')||'<div class="muted">Las predicciones se guardarán automáticamente al iniciar cada vela.</div>'}
+function updatePrediction(c){let h=load(),id=candleId(c);let existing=h.find(x=>x.id===id);if(existing){lastPred=existing;showPrediction(existing);return}let prior=candles5.filter(x=>x.time<c.time&&x.closed);let p=predict(c.open,prior);let rec={id,time:c.time,open:c.open,close:null,direction:p.direction,confidence:p.confidence,why:p.why,result:null};h.push(rec);save(h);lastPred=rec;showPrediction(rec)}
+function showPrediction(p){$('open').textContent='$'+fmt(p.open);$('direction').textContent=p.direction;$('direction').className='signal '+(p.direction==='SUBIR'?'green':p.direction==='BAJAR'?'red':'yellow');$('confidence').textContent=p.confidence==null?'—':p.confidence+'% · orientativa';$('confbar').style.width=(p.confidence||0)+'%';$('confbar').style.background=p.direction==='SUBIR'?'var(--green)':p.direction==='BAJAR'?'var(--red)':'var(--yellow)';$('state').textContent=p.result==null?'EN CURSO':p.result==='WIN'?'ACIERTO':'CERRADA';$('why').textContent=p.why+' La confianza no está calibrada; comprueba la tasa real del historial.'}
+function resolveClosed(){let h=load(),changed=false;for(let x of h){if(x.result!==null)continue;let c=candles5.find(c=>String(c.time)===x.id);if(c&&c.closed){x.close=c.close;x.result=x.direction==='SIN VENTAJA'?'NO_DIRECTION':(((x.direction==='SUBIR'&&c.close>x.open)||(x.direction==='BAJAR'&&c.close<x.open))?'WIN':c.close===x.open?'TIE':'LOSS');x.closedAt=Date.now();changed=true}}if(changed)save(h)}
+async function fetchData(){if(busy)return;busy=true;$('live').textContent='Actualizando…';try{const base='https://data-api.binance.vision/api/v3';let [p,k5,k1]=await Promise.all([fetch(base+'/ticker/price?symbol=BTCUSDT',{cache:'no-store'}),fetch(base+'/klines?symbol=BTCUSDT&interval=5m&limit=150',{cache:'no-store'}),fetch(base+'/klines?symbol=BTCUSDT&interval=1m&limit=100',{cache:'no-store'})]);if(!p.ok||!k5.ok||!k1.ok)throw Error('Respuesta de mercado no disponible');price=+(await p.json()).price;let raw5=await k5.json(),raw1=await k1.json(),now=Date.now();candles5=raw5.map(x=>({time:+x[0],open:+x[1],high:+x[2],low:+x[3],close:+x[4],volume:+x[5],closed:+x[6]<now}));candles1=raw1.map(x=>({time:+x[0],open:+x[1],high:+x[2],low:+x[3],close:+x[4],volume:+x[5],closed:+x[6]<now}));let current=candles5.filter(c=>!c.closed).at(-1)||candles5.at(-1);if(!current)throw Error('No se encontró la vela actual');$('price').textContent='$'+fmt(price);$('updated').textContent='Actualizado '+new Date().toLocaleTimeString()+' · Binance';$('live').textContent='● EN VIVO';$('live').className='green';let elapsed=now-current.time,remaining=Math.max(0,300000-elapsed);$('countdown').textContent=String(Math.floor(remaining/60000)).padStart(2,'0')+':'+String(Math.floor(remaining%60000/1000)).padStart(2,'0');$('change').textContent=pct((price/current.open-1)*100);$('change').className=(price>=current.open?'green':'red');updatePrediction(current);resolveClosed();render();}catch(e){$('live').textContent='Sin conexión';$('live').className='red';$('why').textContent='No se pudo actualizar el mercado: '+e.message+' . No se inventará una predicción sin datos.'}finally{busy=false}}
+async function notify(){if(!('Notification'in window)){$('notifstatus').textContent='Este navegador no permite notificaciones.';return}let p=await Notification.requestPermission();$('notifstatus').textContent=p==='granted'?'Avisos habilitados; el sistema operativo puede suspender la página en segundo plano.':'Permiso no concedido.'}
+function exportCSV(){let h=load();if(!h.length){alert('Aún no hay historial.');return}let rows=[['time','start_price','end_price','direction','estimated_confidence','result','reason'],...h.map(x=>[new Date(x.time).toISOString(),x.open,x.close??'',x.direction,x.confidence??'',x.result??'IN_PROGRESS',x.why])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='btc5m-predictions.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('refresh').onclick=fetchData;$('notify').onclick=notify;$('export').onclick=exportCSV;$('clear').onclick=()=>{if(confirm('¿Borrar el historial guardado en este dispositivo?')){localStorage.removeItem(KEY);render();fetchData()}};render();fetchData();setInterval(fetchData,5000);if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
