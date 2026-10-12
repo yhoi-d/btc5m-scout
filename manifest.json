@@ -1,1 +1,25 @@
-{"name":"BTC 5M AI Lab","short_name":"BTC 5M AI","start_url":"./","display":"standalone","background_color":"#101722","theme_color":"#101722","description":"Recopilación y entrenamiento experimental de predicciones BTC/USDT a 5 minutos"}
+{
+  "id": "./",
+  "name": "BTC 5M AI Lab",
+  "short_name": "BTC 5M AI",
+  "description": "Recopilación y entrenamiento experimental de predicciones BTC/USDT a 5 minutos",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101722",
+  "theme_color": "#101722",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
