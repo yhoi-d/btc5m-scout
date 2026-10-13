@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>BTC 5M AI Lab</title>
+  <title>BTC 5M AI Lab - Multi Coin</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg-color: #0b0e14;
-      --card-bg: #151a23;
-      --card-border: #1f2735;
+      --bg-color: #080b11;
+      --card-bg: #121824;
+      --card-border: #1e293b;
       --text-main: #ffffff;
-      --text-sub: #8a93a6;
+      --text-sub: #94a3b8;
       --green: #22c55e;
       --red: #ef4444;
       --yellow: #f59e0b;
@@ -19,18 +20,17 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 16px 16px 80px 16px;
+      padding: 16px 16px 85px 16px;
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     
-    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .status-badge {
       font-size: 11px;
@@ -39,6 +39,31 @@
       background: rgba(34, 197, 94, 0.15);
       color: var(--green);
       font-weight: bold;
+    }
+
+    /* Selector de Monedas */
+    .coin-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .coin-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .coin-btn.active {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
     }
     
     /* Cards */
@@ -50,19 +75,17 @@
       margin-bottom: 16px;
     }
     .card-title {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-sub);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .price {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 800;
-      letter-spacing: -0.5px;
     }
     
-    /* Layout Grids */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -71,29 +94,27 @@
     .stat-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--card-border);
-      padding: 14px;
+      padding: 12px;
       border-radius: 10px;
       text-align: center;
     }
     .stat-val {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
       margin-top: 4px;
     }
     
-    /* Text Colors */
     .green { color: var(--green); }
     .red { color: var(--red); }
     .yellow { color: var(--yellow); }
     .blue { color: var(--blue); }
     
     .prediction-badge {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       margin: 6px 0;
     }
 
-    /* Sections Control */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
@@ -104,7 +125,7 @@
       left: 0;
       right: 0;
       height: 65px;
-      background: #11151d;
+      background: #0f141d;
       border-top: 1px solid var(--card-border);
       display: flex;
       justify-content: space-around;
@@ -124,21 +145,15 @@
     .nav-item.active {
       color: var(--blue);
     }
-    .nav-icon {
-      font-size: 20px;
-      margin-bottom: 3px;
-    }
-
-    /* Buttons */
+    
     button {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background: var(--blue);
       border: none;
       color: white;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 14px;
       cursor: pointer;
     }
     .btn-danger {
@@ -146,84 +161,88 @@
       color: var(--red);
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
-    
-    /* Premium Box */
-    .premium-card {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid #3b82f6;
-    }
-    .premium-price {
-      font-size: 28px;
-      font-weight: bold;
-      color: var(--blue);
-      margin: 12px 0;
-    }
-    .feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 16px 0;
-      font-size: 14px;
-      line-height: 1.8;
+
+    chart-container {
+      position: relative;
+      height: 150px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO FIJO -->
+  <!-- ENCABEZADO -->
   <div class="header">
     <div>
-      <h2 style="margin:0; font-size: 20px;">BTC 5M AI Lab</h2>
-      <span style="font-size: 12px; color: var(--text-sub);">Análisis e Indicadores 5M</span>
+      <h2 style="margin:0; font-size: 18px;">BTC 5M AI Lab</h2>
+      <span style="font-size: 11px; color: var(--text-sub);">Predicción Multimoneda 5M</span>
     </div>
     <div id="conn-status" class="status-badge">Conectando...</div>
   </div>
 
-  <!-- PANTALLA 1: INICIO -->
+  <!-- SELECTOR DE CRIPTOMONEDAS -->
+  <div class="coin-selector">
+    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">BTC/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">ETH/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">SOL/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">BNB/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">XRP/USDT</button>
+  </div>
+
+  <!-- PANTALLA 1: INICIO Y GRÁFICAS -->
   <div id="tab-inicio" class="tab-content active">
     <div class="card">
-      <div class="card-title">Vela Actual BTC/USDT</div>
-      <div id="btc-price" class="price">$--,---.--</div>
-      <div style="font-size: 13px; color: var(--text-sub); margin-top: 6px;">
-        Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
+      <div class="card-title" id="coin-title">Vela Actual BTC/USDT (5M)</div>
+      <div id="coin-price" class="price">$--,---.--</div>
+      <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">
+        Cierre de vela en: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
+      </div>
+    </div>
+
+    <!-- MINI GRÁFICA EN VIVO DE VELAS 5M -->
+    <div class="card">
+      <div class="card-title">Tendencia en Vivo (5m)</div>
+      <div style="height: 140px;">
+        <canvas id="liveChart"></canvas>
       </div>
     </div>
 
     <div class="card">
       <div class="card-title">Pronóstico en Vivo</div>
       <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
-      <div style="font-size: 14px; margin-top: 4px;">
+      <div style="font-size: 14px;">
         Confianza estimada: <b id="pred-confidence">--%</b>
       </div>
-      <div style="font-size: 13px; color: var(--text-sub); margin-top: 8px;">
-        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO VELA</b>
+      <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
+        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO Cierre</b>
       </div>
     </div>
   </div>
 
-  <!-- PANTALLA 2: ESTADÍSTICAS -->
+  <!-- PANTALLA 2: ESTADÍSTICAS POR MONEDA -->
   <div id="tab-estadisticas" class="tab-content">
     <div class="card">
-      <div class="card-title">Rendimiento Histórico</div>
+      <div class="card-title" id="stats-title">Rendimiento 5M (BTC/USDT)</div>
       <div class="grid-2">
         <div class="stat-box">
-          <div style="font-size:12px; color:var(--text-sub);">Aciertos</div>
+          <div style="font-size:11px; color:var(--text-sub);">Aciertos 5M</div>
           <div id="stat-hits" class="stat-val green">0</div>
         </div>
         <div class="stat-box">
-          <div style="font-size:12px; color:var(--text-sub);">Fallos</div>
+          <div style="font-size:11px; color:var(--text-sub);">Fallos 5M</div>
           <div id="stat-misses" class="stat-val red">0</div>
         </div>
         <div class="stat-box">
-          <div style="font-size:12px; color:var(--text-sub);">Abstenciones</div>
+          <div style="font-size:11px; color:var(--text-sub);">Abstenciones</div>
           <div id="stat-abstained" class="stat-val yellow">0</div>
         </div>
         <div class="stat-box">
-          <div style="font-size:12px; color:var(--text-sub);">Precisión</div>
+          <div style="font-size:11px; color:var(--text-sub);">Precisión</div>
           <div id="stat-accuracy" class="stat-val blue">0.0%</div>
         </div>
       </div>
-      <button class="btn-danger" style="margin-top: 16px;" onclick="resetStats()">
-        Reiniciar Estadísticas
+      <button class="btn-danger" style="margin-top: 14px;" onclick="resetCurrentCoinStats()">
+        Reiniciar Métricas de Moneda
       </button>
     </div>
   </div>
@@ -231,66 +250,93 @@
   <!-- PANTALLA 3: HISTORIAL -->
   <div id="tab-historial" class="tab-content">
     <div class="card">
-      <div class="card-title">Últimas Señales Registradas</div>
+      <div class="card-title">Historial de Señales (Moneda Actual)</div>
       <div id="history-list" style="font-size: 13px; color: var(--text-sub);">
-        Aún no hay señales cerradas en esta sesión.
+        Esperando cierres de velas de 5 minutos...
       </div>
-    </div>
-  </div>
-
-  <!-- PANTALLA 4: PREMIUM -->
-  <div id="tab-premium" class="tab-content">
-    <div class="card premium-card">
-      <div class="card-title" style="color:#60a5fa;">Pase Premium</div>
-      <div class="premium-price">$9.900 COP <span style="font-size:14px; color:var(--text-sub); font-weight:normal;">/ mes</span></div>
-      <ul class="feature-list">
-        <li>💎 Sin anuncios interrupciones.</li>
-        <li>📊 Historial completo de señales.</li>
-        <li>📈 Estadísticas avanzadas por período.</li>
-        <li>🔔 Alertas prioritarias configurables.</li>
-      </ul>
-      <button style="background: #2563eb;" onclick="alert('Opción Premium en preparación para Google Play Billing')">
-        Suscribirse Ahora
-      </button>
     </div>
   </div>
 
   <!-- BARRA DE NAVEGACIÓN INFERIOR -->
   <div class="navbar">
     <div class="nav-item active" onclick="switchTab('inicio', this)">
-      <span class="nav-icon">📊</span>
+      <span style="font-size:18px;">📊</span>
       <span>Inicio</span>
     </div>
     <div class="nav-item" onclick="switchTab('estadisticas', this)">
-      <span class="nav-icon">📈</span>
+      <span style="font-size:18px;">📈</span>
       <span>Estadísticas</span>
     </div>
     <div class="nav-item" onclick="switchTab('historial', this)">
-      <span class="nav-icon">📜</span>
+      <span style="font-size:18px;">📜</span>
       <span>Historial</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('premium', this)">
-      <span class="nav-icon">💎</span>
-      <span>Premium</span>
     </div>
   </div>
 
   <script>
-    // Cambio de Pestañas
+    let currentSymbol = 'btcusdt';
+    let currentLabel = 'BTC/USDT';
+    let ws = null;
+    let chart = null;
+    let priceHistory = [];
+    let lastSignal = null;
+
+    // Métricas por moneda guardadas en almacenamiento local
+    let coinStats = JSON.parse(localStorage.getItem('btc5m_multicoin_stats')) || {
+      btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
+      ethusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
+      solusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
+      bnbusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
+      xrpusdt: { hits: 0, misses: 0, abstained: 0, history: [] }
+    };
+
     function switchTab(tabId, element) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      
       document.getElementById('tab-' + tabId).classList.add('active');
       element.classList.add('active');
     }
 
-    // Datos y Lógica
-    let lastSignal = null;
-    let history = [];
-    let stats = JSON.parse(localStorage.getItem('btc5m_stats')) || { hits: 0, misses: 0, abstained: 0 };
+    function initChart() {
+      const ctx = document.getElementById('liveChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            borderColor: '#3b82f6',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { display: false },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function selectCoin(symbol, label, element) {
+      document.querySelectorAll('.coin-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+      currentSymbol = symbol;
+      currentLabel = label;
+      document.getElementById('coin-title').innerText = `Vela Actual ${label} (5M)`;
+      document.getElementById('stats-title').innerText = `Rendimiento 5M (${label})`;
+      connectWebSocket();
+      updateStatsUI();
+      renderHistory();
+    }
 
     function updateStatsUI() {
+      const stats = coinStats[currentSymbol] || { hits: 0, misses: 0, abstained: 0 };
       document.getElementById('stat-hits').innerText = stats.hits;
       document.getElementById('stat-misses').innerText = stats.misses;
       document.getElementById('stat-abstained').innerText = stats.abstained;
@@ -299,89 +345,125 @@
       const accuracy = totalEvaluated > 0 ? ((stats.hits / totalEvaluated) * 100).toFixed(1) : "0.0";
       document.getElementById('stat-accuracy').innerText = accuracy + "%";
       
-      localStorage.setItem('btc5m_stats', JSON.stringify(stats));
+      localStorage.setItem('btc5m_multicoin_stats', JSON.stringify(coinStats));
     }
 
-    function resetStats() {
-      if (confirm("¿Deseas reiniciar el contador de estadísticas?")) {
-        stats = { hits: 0, misses: 0, abstained: 0 };
-        history = [];
-        document.getElementById('history-list').innerHTML = "Aún no hay señales cerradas en esta sesión.";
-        updateStatsUI();
+    function renderHistory() {
+      const list = coinStats[currentSymbol].history || [];
+      if (list.length === 0) {
+        document.getElementById('history-list').innerHTML = "Esperando cierres de velas de 5 minutos...";
+      } else {
+        document.getElementById('history-list').innerHTML = list.slice(0, 10).map(item => 
+          `<div style="padding: 8px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`
+        ).join('');
       }
     }
 
-    // WebSocket Binance
-    const ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_5m");
+    function resetCurrentCoinStats() {
+      if (confirm(`¿Reiniciar estadísticas para ${currentLabel}?`)) {
+        coinStats[currentSymbol] = { hits: 0, misses: 0, abstained: 0, history: [] };
+        updateStatsUI();
+        renderHistory();
+      }
+    }
 
-    ws.onopen = () => {
-      document.getElementById('conn-status').innerText = "Binance activo";
-    };
+    function connectWebSocket() {
+      if (ws) ws.close();
+      priceHistory = [];
+      if (chart) {
+        chart.data.labels = [];
+        chart.data.datasets[0].data = [];
+        chart.update();
+      }
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const kline = data.k;
+      document.getElementById('conn-status').innerText = "Conectando...";
+      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol}@kline_5m`);
 
-      const currentPrice = parseFloat(kline.c).toFixed(2);
-      const openPrice = parseFloat(kline.o);
-      const isCandleClosed = kline.x;
+      ws.onopen = () => {
+        document.getElementById('conn-status').innerText = `${currentLabel} Activo`;
+      };
 
-      document.getElementById('btc-price').innerText = "$" + currentPrice;
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const kline = data.k;
+        const currentPrice = parseFloat(kline.c);
+        const openPrice = parseFloat(kline.o);
+        const isCandleClosed = kline.x;
 
-      const now = new Date().getTime();
-      const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
-      const m = Math.floor(restSec / 60).toString().padStart(2, '0');
-      const s = (restSec % 60).toString().padStart(2, '0');
-      document.getElementById('timer').innerText = `${m}:${s}`;
+        document.getElementById('coin-price').innerText = "$" + currentPrice.toLocaleString();
 
-      const diff = ((currentPrice - openPrice) / openPrice) * 100;
-      const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
+        // Actualizar Temporizador
+        const now = new Date().getTime();
+        const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
+        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
+        const s = (restSec % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
 
-      let direction = diff >= 0 ? "SUBIR" : "BAJAR";
-      let recommendation = confidence > 65 ? "ENTRAR" : "NO ENTRAR";
-
-      const predElem = document.getElementById('pred-direction');
-      predElem.innerText = direction;
-      predElem.className = "prediction-badge " + (direction === "SUBIR" ? "green" : "red");
-
-      document.getElementById('pred-confidence').innerText = confidence + "%";
-      document.getElementById('pred-recommendation').innerText = recommendation;
-      document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
-
-      if (isCandleClosed) {
-        if (lastSignal) {
-          let resultText = "";
-          if (lastSignal.recommendation === "NO ENTRAR") {
-            stats.abstained++;
-            resultText = "⚠️ Abstención";
-          } else {
-            const realDirection = parseFloat(kline.c) >= parseFloat(kline.o) ? "SUBIR" : "BAJAR";
-            if (lastSignal.direction === realDirection) {
-              stats.hits++;
-              resultText = "✅ Acierto";
-            } else {
-              stats.misses++;
-              resultText = "❌ Fallo";
-            }
+        // Actualizar Gráfica
+        if (chart) {
+          if (chart.data.labels.length > 20) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
           }
-          
-          // Agregar al historial visual
-          history.unshift(`Vela: $${currentPrice} | Señal: ${lastSignal.direction} | ${resultText}`);
-          document.getElementById('history-list').innerHTML = history.slice(0, 10).map(item => `<div style="padding: 8px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`).join('');
-          
-          updateStatsUI();
+          chart.data.labels.push('');
+          chart.data.datasets[0].data.push(currentPrice);
+          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#22c55e' : '#ef4444';
+          chart.update();
         }
 
-        lastSignal = {
-          time: kline.t,
-          direction: direction,
-          confidence: confidence,
-          recommendation: recommendation
-        };
-      }
-    };
+        // Lógica de Estimación
+        const diff = ((currentPrice - openPrice) / openPrice) * 100;
+        const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
+        let direction = diff >= 0 ? "SUBIR" : "BAJAR";
+        let recommendation = confidence > 65 ? "ENTRAR" : "NO ENTRAR";
 
-    updateStatsUI();
+        const predElem = document.getElementById('pred-direction');
+        predElem.innerText = direction;
+        predElem.className = "prediction-badge " + (direction === "SUBIR" ? "green" : "red");
+
+        document.getElementById('pred-confidence').innerText = confidence + "%";
+        document.getElementById('pred-recommendation').innerText = recommendation;
+        document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
+
+        // Registro tras cierre de vela de 5 minutos
+        if (isCandleClosed) {
+          if (lastSignal) {
+            let resultText = "";
+            if (lastSignal.recommendation === "NO ENTRAR") {
+              coinStats[currentSymbol].abstained++;
+              resultText = "⚠️ Abstención";
+            } else {
+              const realDirection = currentPrice >= openPrice ? "SUBIR" : "BAJAR";
+              if (lastSignal.direction === realDirection) {
+                coinStats[currentSymbol].hits++;
+                resultText = "✅ Acierto";
+              } else {
+                coinStats[currentSymbol].misses++;
+                resultText = "❌ Fallo";
+              }
+            }
+            
+            coinStats[currentSymbol].history.unshift(`Vela $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
+            updateStatsUI();
+            renderHistory();
+          }
+
+          lastSignal = {
+            time: kline.t,
+            direction: direction,
+            confidence: confidence,
+            recommendation: recommendation
+          };
+        }
+      };
+    }
+
+    window.onload = () => {
+      initChart();
+      connectWebSocket();
+      updateStatsUI();
+      renderHistory();
+    };
   </script>
 
 </body>
