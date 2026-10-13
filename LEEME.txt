@@ -1,0 +1,20 @@
+BTC 5M AI Lab v6 — historial ampliado y seguimiento de señales
+
+Sube los archivos de esta carpeta a la raíz del repositorio GitHub Pages y reemplaza los existentes:
+- index.html (reemplazar)
+- manifest.json (reemplazar)
+- sw.js (reemplazar)
+- icon-192.png (nuevo o reemplazar)
+- icon-512.png (nuevo o reemplazar)
+- icon.svg (puedes conservarlo o reemplazarlo)
+
+Después haz Commit changes y espera a que GitHub Pages publique los cambios.
+No subas el ZIP como un único archivo: hay que subir los archivos extraídos.
+
+Novedades:
+- Descarga hasta 10.000 velas cerradas de 5 minutos mediante 10 peticiones de 1.000 velas.
+- Panel de aciertos, fallos y abstenciones. La abstención no cuenta como acierto ni fallo.
+- Exportación CSV del registro de resultados.
+- Actualización automática del modelo cada 20 resultados resueltos, a partir de al menos 100 muestras etiquetadas, combinando histórico y velas en vivo.
+- Las estadísticas empiezan a contar intervalos observados desde que se abre esta versión; no se etiquetan retrospectivamente las velas anteriores como señales reales.
+- La app no ejecuta operaciones en Binance. Las señales y probabilidades son experimentales, no garantizan resultados.
