@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>BTC 5M AI Lab - Multi Coin</title>
+  <title>BTC 5M AI Lab - Multi Coin Ultra</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -161,12 +161,6 @@
       color: var(--red);
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
-
-    chart-container {
-      position: relative;
-      height: 150px;
-      width: 100%;
-    }
   </style>
 </head>
 <body>
@@ -195,14 +189,14 @@
       <div class="card-title" id="coin-title">Vela Actual BTC/USDT (5M)</div>
       <div id="coin-price" class="price">$--,---.--</div>
       <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">
-        Cierre de vela en: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
+        Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
       </div>
     </div>
 
-    <!-- MINI GRÁFICA EN VIVO DE VELAS 5M -->
+    <!-- MINI GRÁFICA FLUIDA SIN ANIMACIÓN PESADA -->
     <div class="card">
-      <div class="card-title">Tendencia en Vivo (5m)</div>
-      <div style="height: 140px;">
+      <div class="card-title">Tendencia en Tiempo Real</div>
+      <div style="height: 130px;">
         <canvas id="liveChart"></canvas>
       </div>
     </div>
@@ -214,7 +208,7 @@
         Confianza estimada: <b id="pred-confidence">--%</b>
       </div>
       <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
-        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO Cierre</b>
+        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO CIERRE</b>
       </div>
     </div>
   </div>
@@ -225,11 +219,11 @@
       <div class="card-title" id="stats-title">Rendimiento 5M (BTC/USDT)</div>
       <div class="grid-2">
         <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Aciertos 5M</div>
+          <div style="font-size:11px; color:var(--text-sub);">Aciertos</div>
           <div id="stat-hits" class="stat-val green">0</div>
         </div>
         <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Fallos 5M</div>
+          <div style="font-size:11px; color:var(--text-sub);">Fallos</div>
           <div id="stat-misses" class="stat-val red">0</div>
         </div>
         <div class="stat-box">
@@ -247,12 +241,12 @@
     </div>
   </div>
 
-  <!-- PANTALLA 3: HISTORIAL -->
+  <!-- PANTALLA 3: HISTORIAL GUARDADO -->
   <div id="tab-historial" class="tab-content">
     <div class="card">
-      <div class="card-title">Historial de Señales (Moneda Actual)</div>
+      <div class="card-title">Historial Guardado (Moneda Actual)</div>
       <div id="history-list" style="font-size: 13px; color: var(--text-sub);">
-        Esperando cierres de velas de 5 minutos...
+        Cargando historial...
       </div>
     </div>
   </div>
@@ -278,17 +272,20 @@
     let currentLabel = 'BTC/USDT';
     let ws = null;
     let chart = null;
-    let priceHistory = [];
     let lastSignal = null;
 
-    // Métricas por moneda guardadas en almacenamiento local
-    let coinStats = JSON.parse(localStorage.getItem('btc5m_multicoin_stats')) || {
+    // Métricas persistentes almacenadas en memoria
+    let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       ethusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       solusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       bnbusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       xrpusdt: { hits: 0, misses: 0, abstained: 0, history: [] }
     };
+
+    function saveToStorage() {
+      localStorage.setItem('btc5m_persistent_stats', JSON.stringify(coinStats));
+    }
 
     function switchTab(tabId, element) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -302,16 +299,17 @@
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: [],
+          labels: Array(15).fill(''),
           datasets: [{
-            data: [],
+            data: Array(15).fill(null),
             borderColor: '#3b82f6',
             borderWidth: 2,
-            tension: 0.3,
+            tension: 0.2,
             pointRadius: 0
           }]
         },
         options: {
+          animation: false,
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
@@ -344,24 +342,23 @@
       const totalEvaluated = stats.hits + stats.misses;
       const accuracy = totalEvaluated > 0 ? ((stats.hits / totalEvaluated) * 100).toFixed(1) : "0.0";
       document.getElementById('stat-accuracy').innerText = accuracy + "%";
-      
-      localStorage.setItem('btc5m_multicoin_stats', JSON.stringify(coinStats));
     }
 
     function renderHistory() {
       const list = coinStats[currentSymbol].history || [];
       if (list.length === 0) {
-        document.getElementById('history-list').innerHTML = "Esperando cierres de velas de 5 minutos...";
+        document.getElementById('history-list').innerHTML = "Sin historial aún para esta moneda.";
       } else {
-        document.getElementById('history-list').innerHTML = list.slice(0, 10).map(item => 
-          `<div style="padding: 8px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`
+        document.getElementById('history-list').innerHTML = list.map(item => 
+          `<div style="padding: 10px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`
         ).join('');
       }
     }
 
     function resetCurrentCoinStats() {
-      if (confirm(`¿Reiniciar estadísticas para ${currentLabel}?`)) {
+      if (confirm(`¿Reiniciar estadísticas e historial de ${currentLabel}?`)) {
         coinStats[currentSymbol] = { hits: 0, misses: 0, abstained: 0, history: [] };
+        saveToStorage();
         updateStatsUI();
         renderHistory();
       }
@@ -369,10 +366,8 @@
 
     function connectWebSocket() {
       if (ws) ws.close();
-      priceHistory = [];
       if (chart) {
-        chart.data.labels = [];
-        chart.data.datasets[0].data = [];
+        chart.data.datasets[0].data = Array(15).fill(null);
         chart.update();
       }
 
@@ -392,26 +387,22 @@
 
         document.getElementById('coin-price').innerText = "$" + currentPrice.toLocaleString();
 
-        // Actualizar Temporizador
+        // Temporizador de cierre de vela 5M
         const now = new Date().getTime();
         const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
         const m = Math.floor(restSec / 60).toString().padStart(2, '0');
         const s = (restSec % 60).toString().padStart(2, '0');
         document.getElementById('timer').innerText = `${m}:${s}`;
 
-        // Actualizar Gráfica
+        // Gráfica ultrarrápida
         if (chart) {
-          if (chart.data.labels.length > 20) {
-            chart.data.labels.shift();
-            chart.data.datasets[0].data.shift();
-          }
-          chart.data.labels.push('');
+          chart.data.datasets[0].data.shift();
           chart.data.datasets[0].data.push(currentPrice);
           chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#22c55e' : '#ef4444';
           chart.update();
         }
 
-        // Lógica de Estimación
+        // Estimación rápida
         const diff = ((currentPrice - openPrice) / openPrice) * 100;
         const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
         let direction = diff >= 0 ? "SUBIR" : "BAJAR";
@@ -425,7 +416,7 @@
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
 
-        // Registro tras cierre de vela de 5 minutos
+        // Registro y guardado al cerrar vela de 5 minutos
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
@@ -443,7 +434,10 @@
               }
             }
             
-            coinStats[currentSymbol].history.unshift(`Vela $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
+            const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Vela: $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
+            
+            saveToStorage();
             updateStatsUI();
             renderHistory();
           }
