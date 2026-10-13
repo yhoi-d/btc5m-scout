@@ -1,39 +1,262 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101722"><link rel="manifest" href="manifest.json"><title>BTC 5M AI Lab</title><style>
-:root{color-scheme:dark;--bg:#101722;--card:#192330;--muted:#9eacbc;--line:#2b3746;--green:#39d3a0;--red:#ff647c;--yellow:#ffc766;--blue:#83b9ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f1f5fa;font:15px system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:780px;margin:auto;padding:15px 12px 38px}.head{display:flex;align-items:center;gap:12px;margin:5px 0 15px}.logo{font-size:27px;background:#263444;border-radius:13px;padding:9px}h1{font-size:21px;margin:0}h2{font-size:16px;margin:0 0 12px}.sub,small,.muted,.note{color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px;margin:12px 0}.row{display:flex;gap:10px;justify-content:space-between;align-items:center}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.label{font-size:12px;color:var(--muted)}.value{font-size:clamp(18px,4vw,24px);font-weight:800;overflow-wrap:anywhere}.timer{font-size:23px;color:var(--yellow);font-weight:800}.pill{border-radius:99px;padding:5px 9px;background:#263445;color:#c6d5e5;font-size:12px}.direction{font-size:28px;font-weight:850}.up,.good{color:var(--green)}.down,.bad{color:var(--red)}.wait,.yellow{color:var(--yellow)}.bar{height:8px;background:#303d4d;border-radius:99px;overflow:hidden;margin:8px 0}.bar>div{height:100%;background:var(--blue);width:0}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mini{background:#202d3b;padding:11px;border-radius:12px}.big{font-size:20px;font-weight:750}.btn{border:1px solid #405064;background:#263445;color:#f5f8fc;border-radius:10px;padding:11px 12px;font-weight:650;cursor:pointer}.primary{background:#2d9d7c;border-color:#2d9d7c}.buttons{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:12px;line-height:1.5}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted)}progress{width:100%}@media(max-width:430px){main{padding:10px 8px}.card{padding:12px}.direction{font-size:24px}}
-</style></head><body><main>
-<div class="head"><div class="logo">₿</div><div style="flex:1"><h1>BTC 5M AI Lab</h1><div class="sub">BTC/USDT · velas alineadas de 5 minutos · entrenamiento experimental</div></div><span class="pill" id="connection">Conectando…</span></div>
-<div class="card"><div class="row"><h2>Vela actual</h2><span class="pill" id="times">UTC —</span></div><div class="metrics"><div><div class="label">Apertura</div><div class="value" id="open">—</div></div><div><div class="label">Precio actual</div><div class="value" id="price">—</div></div><div><div class="label">Restante</div><div class="timer" id="timer">05:00</div></div></div><div class="bar"><div id="progress"></div></div><div class="row"><small id="delta">Cambio desde apertura: —</small><small id="updated">—</small></div></div>
-<div class="card"><div class="row"><h2>Pronóstico en vivo</h2><span class="pill" id="modelStatus">Modelo sin entrenar</span></div><div class="direction wait" id="direction">RECOPILANDO DATOS</div><div class="row"><span class="muted">Probabilidad estimada del modelo</span><strong id="prob">—</strong></div><div class="bar"><div id="probbar"></div></div><div class="row"><span class="muted">Recomendación</span><strong class="wait" id="decision">NO ENTRAR</strong></div><p class="note" id="why">Descarga datos históricos y entrena el primer modelo.</p><div class="twocol"><div class="mini"><div class="label">Régimen detectado</div><div class="big" id="regime">—</div></div><div class="mini"><div class="label">Estabilidad</div><div class="big" id="stability">—</div></div></div><p class="note">La probabilidad es experimental. Solo se recomienda una dirección si la confianza supera el umbral y no hay señales fuertes de volatilidad o conflicto. No ejecuta operaciones.</p></div>
-<div class="card"><h2>1. Datos históricos de Binance</h2><p class="note">Descarga hasta 10.000 velas cerradas de 5 minutos (aprox. 34,7 días), por bloques de 1.000 para respetar los límites de Binance. Se usan datos públicos; no hace falta API key.</p><div class="buttons"><button class="btn primary" id="downloadHist">Descargar 10.000 velas</button><button class="btn" id="exportData">Exportar dataset CSV</button></div><p id="histStatus" class="note">Histórico: no descargado.</p></div>
-<div class="card"><h2>2. Entrenar y validar el modelo</h2><p class="note">Modelo inicial: regresión logística con indicadores derivados de velas anteriores. Separación cronológica 80/20: el tramo de prueba es posterior al de entrenamiento, para reducir fuga de información.</p><div class="buttons"><button class="btn primary" id="train">Entrenar y evaluar</button><button class="btn" id="exportModelData">Exportar datos etiquetados</button></div><div class="metrics" style="margin-top:12px"><div><div class="label">Muestras entreno</div><div class="value" id="nTrain">—</div></div><div><div class="label">Muestras prueba</div><div class="value" id="nTest">—</div></div><div><div class="label">Acierto prueba</div><div class="value" id="testAcc">—</div></div></div><div class="twocol" style="margin-top:9px"><div class="mini"><div class="label">Acierto clase subida</div><div class="big" id="upAcc">—</div></div><div class="mini"><div class="label">Acierto clase bajada</div><div class="big" id="downAcc">—</div></div></div><p id="trainStatus" class="note">Aún no se ha entrenado un modelo.</p></div>
-<div class="card"><div class="row"><h2>3. Aprendizaje en vivo</h2><span class="pill" id="liveCount">0 velas</span></div><p class="note">Cada vela cerrada se guarda con su resultado real. El modelo no se reentrena en cada segundo: vuelve a entrenarlo periódicamente y evalúa siempre con velas posteriores. Los datos se guardan en este dispositivo.</p><div class="buttons"><button class="btn" id="exportLive">Exportar velas en vivo</button><button class="btn" id="clearLive">Borrar datos en vivo</button></div><div class="row" style="margin-top:12px"><span class="muted">Velas en vivo con resultado</span><strong id="liveLabeled">0</strong></div><p class="note" id="liveNote">Mantén la página abierta. El navegador puede suspender la recopilación si la pestaña queda en segundo plano.</p></div>
-<div class="card"><div class="row"><h2>4. Seguimiento de señales</h2><span class="pill" id="scoreCoverage">0 señales resueltas</span></div><p class="note">Cada intervalo se clasifica una sola vez al cerrarse: acierto, fallo o abstención. Las abstenciones no cuentan como aciertos ni fallos. Los resultados se guardan en este dispositivo.</p><div class="metrics"><div class="mini"><div class="label">Aciertos</div><div class="value good" id="wins">0</div></div><div class="mini"><div class="label">Fallos</div><div class="value bad" id="losses">0</div></div><div class="mini"><div class="label">Abstenciones</div><div class="value wait" id="abstentions">0</div></div></div><div class="twocol" style="margin-top:9px"><div class="mini"><div class="label">Acierto entre señales emitidas</div><div class="big" id="hitRate">—</div></div><div class="mini"><div class="label">Cobertura de señales</div><div class="big" id="coverage">—</div></div></div><p class="note" id="learningNote">El aprendizaje automático se ampliará al acumular resultados nuevos; los resultados pasados no se reescriben.</p><div class="buttons"><button class="btn" id="exportScore">Exportar aciertos/fallos/abstenciones</button></div></div>
-<div class="card"><div class="row"><h2>Historial reciente</h2><span class="pill" id="historyCount">0 velas</span></div><div class="scroll"><table><thead><tr><th>Inicio UTC</th><th>Apertura</th><th>Cierre</th><th>Resultado real</th><th>Pronóstico fijado</th><th>Conf.</th></tr></thead><tbody id="history"><tr><td colspan="6" class="muted">Aún no hay velas en vivo completadas.</td></tr></tbody></table></div></div>
-<p class="note">Limitaciones: el navegador no ejecuta entrenamiento persistente si está cerrado; el dataset se guarda localmente y puede perderse al borrar los datos del sitio. El modelo no garantiza beneficios. Para una IA más robusta, el siguiente paso será guardar los datos en un archivo/servidor y probar modelos más complejos fuera de muestra.</p>
-</main><script>
-const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const HISTKEY='btc5m_v5_hist',LIVEKEY='btc5m_v5_live',MODELKEY='btc5m_v5_model';let hist=JSON.parse(localStorage.getItem(HISTKEY)||'[]'),live=JSON.parse(localStorage.getItem(LIVEKEY)||'[]'),model=null,ticker=0,klines=[],busy=false,lastClosedStart=0,latestForecast=null;
-const SCOREKEY='btc5m_v6_score', saveLive=()=>localStorage.setItem(LIVEKEY,JSON.stringify(live.slice(-3000))),saveHist=()=>localStorage.setItem(HISTKEY,JSON.stringify(hist));let score=JSON.parse(localStorage.getItem(SCOREKEY)||'[]');const saveScore=()=>localStorage.setItem(SCOREKEY,JSON.stringify(score.slice(-10000)));
-function decisionFor(p,f){if(p===null||p===undefined||!f)return {kind:'abstention',direction:'—',confidence:null,regime:'—'};let rg=regime(f),conf=Math.max(p,1-p)*100,stable=Math.abs(p-.5)>=.12,shock=['BRUSCO','ERRÁTICO','VOLÁTIL'].includes(rg),enter=conf>=65&&stable&&!shock;return {kind:enter?'signal':'abstention',direction:p>=.5?'SUBIR':'BAJAR',confidence:conf,regime:rg}}
-function updateScoreUI(){let resolved=score.filter(x=>x.outcome==='acierto'||x.outcome==='fallo'),wins=resolved.filter(x=>x.outcome==='acierto').length,losses=resolved.length-wins,abs=score.filter(x=>x.outcome==='abstencion').length,signals=wins+losses;$('wins').textContent=wins;$('losses').textContent=losses;$('abstentions').textContent=abs;$('scoreCoverage').textContent=resolved.length+' resueltas';$('hitRate').textContent=signals?(100*wins/signals).toFixed(1)+'%':'—';$('coverage').textContent=score.length?(100*signals/score.length).toFixed(1)+'%':'—';$('learningNote').textContent=`Registro: ${score.length} intervalos · ${signals} con señal evaluada. La tasa no garantiza resultados futuros.`;}
-function learnFromResolved(){let labelled=hist.filter(x=>x.label!==null&&Array.isArray(x.features)).concat(live.filter(x=>x.label!==null&&Array.isArray(x.features))).sort((a,b)=>a.time-b.time);let unique=[...new Map(labelled.map(x=>[x.time,x])).values()];if(unique.length<100)return;try{model=fitLogistic(unique);localStorage.setItem(MODELKEY,JSON.stringify(model));$('modelStatus').textContent='Modelo actualizado';$('learningNote').textContent+=` Modelo actualizado con ${unique.length} muestras etiquetadas.`;renderCurrent()}catch(e){console.warn('No se pudo actualizar el modelo',e)}}
-const API_BASES=['https://data-api.binance.vision','https://api.binance.com','https://api1.binance.com'];
-async function fetchMarket(path){let errors=[];for(const base of API_BASES){try{const r=await fetch(base+path,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status+' en '+base);return await r.json()}catch(e){errors.push(e.message)}}throw Error('No se pudo conectar a los servidores públicos de Binance. '+errors.join(' | '))}
-async function fetchJson(url){const u=new URL(url);return fetchMarket(u.pathname+u.search)}
-async function update(){if(busy)return;busy=true;try{const [k,t]=await Promise.all([fetchMarket('/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=300'),fetchMarket('/api/v3/ticker/price?symbol=BTCUSDT')]);klines=k;ticker=+t.price;$('connection').textContent='Binance conectado';$('connection').style.color='var(--green)';handleClosed();renderLive();renderCurrent()}catch(e){$('connection').textContent='Error de conexión';$('connection').style.color='var(--red)';$('why').textContent='No se pudieron actualizar datos públicos de Binance. Comprueba la conexión y vuelve a cargar. '+e.message}finally{busy=false}}
-function featuresAt(arr,i){if(i<25)return null;let c=arr[i],prev=arr.slice(Math.max(0,i-60),i),cl=prev.map(x=>+x[4]),op=+c[1],close=+c[4],vol=+c[5];const ema=(v,p)=>{let a=2/(p+1),z=v[0];for(let x of v.slice(1))z=x*a+z*(1-a);return z};let e9=ema(cl.slice(-Math.min(40,cl.length)),9),e21=ema(cl.slice(-Math.min(50,cl.length)),21),e50=ema(cl.slice(-Math.min(60,cl.length)),Math.min(50,cl.length));let ret=(n)=>(cl.at(-1)-cl[Math.max(0,cl.length-1-n)])/cl[Math.max(0,cl.length-1-n)]*100;let gains=0,loss=0;for(let j=Math.max(1,cl.length-14);j<cl.length;j++){let d=cl[j]-cl[j-1];if(d>0)gains+=d;else loss-=d}let rs=loss===0?100:gains/(loss||1),rsi=100-100/(1+rs);let ranges=prev.slice(-20).map(x=>(+x[2]-+x[3])/(+x[1]||1)*100),avgRange=ranges.reduce((a,b)=>a+b,0)/(ranges.length||1);let vr=prev.slice(-20).map(x=>+x[5]),vavg=vr.reduce((a,b)=>a+b,0)/(vr.length||1);let bodies=prev.slice(-4).map(x=>(+x[4]-+x[1])/(+x[1]||1)*100),flips=0;for(let j=1;j<bodies.length;j++)if(bodies[j]*bodies[j-1]<0)flips++;return [((e9/e21)-1)*100,((e21/e50)-1)*100,ret(1),ret(3),ret(6),ret(12),rsi/100,avgRange,vol/(vavg||1),flips/3,((+prev.at(-1)[2]-+prev.at(-1)[3])/(+prev.at(-1)[1]||1))*100,((+prev.at(-1)[4]-+prev.at(-1)[1])/(+prev.at(-1)[1]||1))*100]}
-function sampleFromKline(arr,i){let f=featuresAt(arr,i);if(!f)return null;let c=arr[i],open=+c[1],close=+c[4];return {time:+c[0],features:f,label:close>open?1:close<open?0:null,open,close,high:+c[2],low:+c[3],volume:+c[5],source:'binance-history'}}
-function sigmoid(z){z=Math.max(-30,Math.min(30,z));return 1/(1+Math.exp(-z))}
-function fitLogistic(samples,epochs=900,lr=.08){const n=samples.length,d=samples[0].features.length,means=Array(d).fill(0),std=Array(d).fill(0);for(let s of samples)s.features.forEach((x,j)=>means[j]+=x/n);for(let s of samples)s.features.forEach((x,j)=>std[j]+=(x-means[j])**2/n);std.forEach((x,j)=>std[j]=Math.sqrt(x)||1);let X=samples.map(s=>s.features.map((x,j)=>(x-means[j])/std[j])),y=samples.map(s=>s.label),w=Array(d).fill(0),b=0;for(let ep=0;ep<epochs;ep++){let gw=Array(d).fill(0),gb=0;for(let i=0;i<X.length;i++){let p=sigmoid(X[i].reduce((z,x,j)=>z+x*w[j],b)),e=p-y[i];gb+=e;for(let j=0;j<d;j++)gw[j]+=e*X[i][j]}b-=lr*gb/X.length;for(let j=0;j<d;j++)w[j]-=lr*(gw[j]/X.length+0.002*w[j])}return {means,std,w,b,features:d}}
-function probability(m,f){let z=m.b;for(let j=0;j<f.length;j++)z+=((f[j]-m.means[j])/m.std[j])*m.w[j];return sigmoid(z)}
-function download(name,content,type='text/csv'){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function csv(rows){return rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n')}
-$('downloadHist').onclick=async()=>{let b=$('downloadHist');b.disabled=true;let all=[],endTime=Date.now();try{for(let page=0;page<10;page++){b.textContent=`Descargando ${page*1000}/10.000…`;let path='/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=1000&endTime='+endTime;let batch=await fetchMarket(path);if(!Array.isArray(batch)||!batch.length)break;all=batch.concat(all);endTime=Number(batch[0][0])-1;if(batch.length<1000)break;await new Promise(r=>setTimeout(r,180));}let dedup=[...new Map(all.map(c=>[+c[0],c])).values()].sort((a,b)=>+a[0]-+b[0]);if(dedup.length&&+dedup[dedup.length-1][0]+300000>Date.now())dedup.pop();hist=dedup.map((c,i)=>sampleFromKline(dedup,i)).filter(x=>x&&x.label!==null);localStorage.setItem(HISTKEY,JSON.stringify(hist));$('histStatus').textContent=`Descargadas ${hist.length.toLocaleString()} velas cerradas (objetivo máximo: 10.000, aprox. 34,7 días).`; $('trainStatus').textContent='Pulsa Entrenar y evaluar para crear/actualizar el modelo.'}catch(e){$('histStatus').textContent=`Descarga parcial: ${all.length} velas recibidas. ${e.message}`}finally{b.disabled=false;b.textContent='Descargar 10.000 velas'}};
-$('train').onclick=()=>{const rawData=hist.filter(x=>x.label!==null).concat(live.filter(x=>x.label!==null));const data=[...new Map(rawData.map(x=>[x.time,x])).values()].sort((a,b)=>a.time-b.time);if(data.length<100){$('trainStatus').textContent='Necesitas descargar histórico primero y tener al menos 100 muestras.';return}let split=Math.floor(data.length*.8),tr=data.slice(0,split),te=data.slice(split);model=fitLogistic(tr);let correct=0,upN=0,upC=0,dnN=0,dnC=0,logloss=0;for(let s of te){let p=probability(model,s.features),pred=p>=.5?1:0;if(pred===s.label)correct++;if(s.label===1){upN++;if(pred===1)upC++}else{dnN++;if(pred===0)dnC++}logloss+=-(s.label*Math.log(Math.max(1e-8,p))+(1-s.label)*Math.log(Math.max(1e-8,1-p)))}$('nTrain').textContent=tr.length;$('nTest').textContent=te.length;$('testAcc').textContent=(100*correct/te.length).toFixed(1)+'%';$('upAcc').textContent=upN?(100*upC/upN).toFixed(1)+'%':'—';$('downAcc').textContent=dnN?(100*dnC/dnN).toFixed(1)+'%':'—';$('trainStatus').textContent=`Modelo entrenado en ${tr.length} velas anteriores. Prueba cronológica: ${te.length} velas; log-loss ${(logloss/te.length).toFixed(3)}. No implica rendimiento futuro.`;localStorage.setItem(MODELKEY,JSON.stringify(model));$('modelStatus').textContent='Modelo entrenado';renderCurrent()};
-function regime(f){if(!f)return '—';if(f[7]>.11||Math.abs(f[10])>.18)return 'BRUSCO';if(f[9]>.66)return 'ERRÁTICO';if(f[7]>.075)return 'VOLÁTIL';if(Math.abs(f[3])>.08)return 'TENDENCIA';return 'NORMAL'}
-function renderCurrent(){if(!ticker||klines.length<30)return;let now=Date.now(),start=Math.floor(now/300000)*300000,cur=klines.find(c=>+c[0]===start),open=cur?+cur[1]:ticker,rem=300000-(now-start),p=cur?(now-start)/300000:0;$('open').textContent=fmt(open);$('price').textContent=fmt(ticker);$('timer').textContent=String(Math.floor(rem/60000)).padStart(2,'0')+':'+String(Math.floor(rem%60000/1000)).padStart(2,'0');$('progress').style.width=(p*100)+'%';let delta=ticker-open;$('delta').textContent=`Cambio: ${delta>=0?'+':''}${fmt(delta)} USDT (${(delta/open*100).toFixed(3)}%)`;$('delta').className=delta>0?'good':delta<0?'bad':'muted';$('times').textContent=new Date(start).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'UTC'})+'–'+new Date(start+300000).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'UTC'})+' UTC';$('updated').textContent='Actualizado '+new Date().toLocaleTimeString('es-CO',{hour12:false});let idx=klines.findIndex(c=>+c[0]===start),f=idx>0?featuresAt(klines,idx):featuresAt(klines,klines.length-1);if(!f){$('direction').textContent='RECOPILANDO DATOS';return}let rg=regime(f),prob=model?probability(model,f):null,dir=prob===null?'MODELO SIN ENTRENAR':prob>=.5?'SUBIR':'BAJAR',conf=prob===null?0:Math.max(prob,1-prob)*100,stable=prob!==null&&Math.abs(prob-.5)>=.12,shock=rg==='BRUSCO'||rg==='ERRÁTICO'||rg==='VOLÁTIL',enter=prob!==null&&conf>=65&&stable&&!shock;$('direction').textContent=dir;$('direction').className='direction '+(dir==='SUBIR'?'up':dir==='BAJAR'?'down':'wait');$('prob').textContent=prob===null?'—':`${conf.toFixed(1)}% ${prob>=.5?'subida':'bajada'}`;$('probbar').style.width=prob===null?'0':conf+'%';$('decision').textContent=enter?'SEÑAL '+dir:'NO ENTRAR';$('decision').className=enter?'good':'wait';$('regime').textContent=rg;$('stability').textContent=prob===null?'Sin modelo':stable?'Más estable':'Cambiante';$('why').textContent=prob===null?'Descarga datos históricos y pulsa Entrenar y evaluar.':`Modelo logístico entrenado con datos históricos. ${shock?'Se abstiene por condiciones volátiles.':enter?'La señal supera el umbral experimental.':'Confianza insuficiente o cambiante.'} Probabilidad experimental, no calibrada.`;latestForecast={start,open,dir,confidence:conf,enter,prob,regime:rg};}
-function handleClosed(){let closed=klines.slice(0,-1);if(lastClosedStart===0&&closed.length){lastClosedStart=+closed[closed.length-1][0];return}for(let c of closed){let ts=+c[0];if(ts<=lastClosedStart)continue;lastClosedStart=ts;let existing=live.find(x=>x.time===ts);if(!existing){let i=klines.findIndex(x=>+x[0]===ts),f=featuresAt(klines,i);if(f){let pp=model?probability(model,f):null,dec=decisionFor(pp,f),label=+c[4]>+c[1]?1:+c[4]<+c[1]?0:null;live.push({time:ts,open:+c[1],close:+c[4],high:+c[2],low:+c[3],volume:+c[5],label,features:f,prediction:pp,decision:dec.kind==='signal'?dec.direction:'ABSTENER',decisionKind:dec.kind,confidence:dec.confidence,outcome:dec.kind==='signal'?(dec.direction===(label===1?'SUBIR':'BAJAR')?'acierto':'fallo'):'abstencion',source:'live'});let row=live[live.length-1];if(!score.some(x=>x.time===ts))score.push({time:ts,decision:row.decision,confidence:row.confidence,regime:dec.regime,outcome:row.outcome,actual:label===1?'SUBIÓ':label===0?'BAJÓ':'EMPATE'});}}}saveLive();saveScore();updateScoreUI();renderLive();let resolved=score.filter(x=>x.outcome==='acierto'||x.outcome==='fallo').length;if(resolved>=100&&resolved%20===0&&resolved!==window.lastAutoLearnCount){window.lastAutoLearnCount=resolved;learnFromResolved()}}
-function renderLive(){let labeled=live.filter(x=>x.label!==null);$('liveCount').textContent=live.length+' velas';$('liveLabeled').textContent=labeled.length;$('historyCount').textContent=live.length+' velas';$('history').innerHTML=live.slice(-25).reverse().map(r=>`<tr><td>${new Date(r.time).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'UTC'})}</td><td>${fmt(r.open)}</td><td>${fmt(r.close)}</td><td>${r.label===1?'SUBIÓ':r.label===0?'BAJÓ':'EMPATE'}</td><td>${r.decision|| (r.prediction===null?'ABSTENER':r.prediction>=.5?'SUBIR':'BAJAR')}</td><td>${r.confidence==null?(r.prediction===null?'—':(100*Math.max(r.prediction,1-r.prediction)).toFixed(1)+'%'):r.confidence.toFixed(1)+'%'}</td></tr>`).join('')||'<tr><td colspan="6">Esperando cierres de velas…</td></tr>'}
-$('exportData').onclick=()=>download('btc5m_historico.csv',csv([['time_utc','open','high','low','close','volume','label','features'],...hist.map(x=>[new Date(x.time).toISOString(),x.open,x.high,x.low,x.close,x.volume,x.label,JSON.stringify(x.features)])]));$('exportModelData').onclick=()=>download('btc5m_training_dataset.csv',csv([['time_utc','open','close','label','features'],...hist.map(x=>[new Date(x.time).toISOString(),x.open,x.close,x.label,JSON.stringify(x.features)])]));$('exportLive').onclick=()=>download('btc5m_live_dataset.csv',csv([['time_utc','open','close','high','low','volume','label','model_probability','features'],...live.map(x=>[new Date(x.time).toISOString(),x.open,x.close,x.high,x.low,x.volume,x.label,x.prediction,JSON.stringify(x.features)])]));$('clearLive').onclick=()=>{if(confirm('¿Borrar las velas en vivo de este dispositivo? Exporta primero si las necesitas.')){live=[];score=[];saveLive();saveScore();renderLive();updateScoreUI()}};$('exportScore').onclick=()=>download('btc5m_aciertos_fallos_abstenciones.csv',csv([['time_utc','decision','confidence','regime','outcome','actual'],...score.map(x=>[new Date(x.time).toISOString(),x.decision,x.confidence,x.regime,x.outcome,x.actual])]));
-try{model=JSON.parse(localStorage.getItem(MODELKEY)||'null');if(model)$('modelStatus').textContent='Modelo guardado'}catch{};hist=hist.filter(x=>x&&Array.isArray(x.features));$('histStatus').textContent=hist.length?`${hist.length} velas históricas guardadas en este dispositivo.`:'Histórico: no descargado.';renderLive();updateScoreUI();update();setInterval(()=>{if(Date.now()%5000<1200)update();else renderCurrent()},1000);if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BTC 5M AI Lab - Beta 0.2</title>
+  <style>
+    :root {
+      --bg-color: #0b0e14;
+      --card-bg: #151a23;
+      --text-main: #ffffff;
+      --text-sub: #8a93a6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .status-badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--green);
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
+    .card-title {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+    .price {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.03);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .yellow { color: var(--yellow); }
+    .blue { color: var(--blue); }
+    
+    .prediction-badge {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h2 style="margin:0;">BTC 5M AI Lab</h2>
+      <span style="font-size: 12px; color: var(--text-sub);">Beta 0.2 · Conexión Binance</span>
+    </div>
+    <div id="conn-status" class="status-badge">Conectando...</div>
+  </div>
+
+  <!-- Tarjeta de Precio -->
+  <div class="card">
+    <div class="card-title">Vela Actual BTC/USDT (5M)</div>
+    <div id="btc-price" class="price">$--,---.--</div>
+    <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">
+      Tiempo restante: <span id="timer" class="yellow">--:--</span>
+    </div>
+  </div>
+
+  <!-- Pronóstico en Vivo -->
+  <div class="card">
+    <div class="card-title">Pronóstico en Vivo</div>
+    <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
+    <div style="font-size: 14px;">
+      Confianza estimada: <b id="pred-confidence">--%</b>
+    </div>
+    <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
+      Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO VELA</b>
+    </div>
+  </div>
+
+  <!-- Módulo de Estadísticas (Beta 0.2) -->
+  <div class="card">
+    <div class="card-title">Rendimiento Histórico (Beta 0.2)</div>
+    <div class="grid-2">
+      <div class="stat-box">
+        <div style="font-size:12px; color:var(--text-sub);">Aciertos</div>
+        <div id="stat-hits" class="stat-val green">0</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:12px; color:var(--text-sub);">Fallos</div>
+        <div id="stat-misses" class="stat-val red">0</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:12px; color:var(--text-sub);">Abstenciones</div>
+        <div id="stat-abstained" class="stat-val yellow">0</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size:12px; color:var(--text-sub);">Precisión</div>
+        <div id="stat-accuracy" class="stat-val blue">0.0%</div>
+      </div>
+    </div>
+    <button style="margin-top: 12px; background: rgba(239, 68, 68, 0.2); color: var(--red);" onclick="resetStats()">
+      Reiniciar Estadísticas
+    </button>
+  </div>
+
+  <script>
+    // Configuración y variables del sistema de métricas
+    let lastSignal = null;
+    let stats = JSON.parse(localStorage.getItem('btc5m_stats')) || { hits: 0, misses: 0, abstained: 0 };
+
+    function updateStatsUI() {
+      document.getElementById('stat-hits').innerText = stats.hits;
+      document.getElementById('stat-misses').innerText = stats.misses;
+      document.getElementById('stat-abstained').innerText = stats.abstained;
+      
+      const totalEvaluated = stats.hits + stats.misses;
+      const accuracy = totalEvaluated > 0 ? ((stats.hits / totalEvaluated) * 100).toFixed(1) : "0.0";
+      document.getElementById('stat-accuracy').innerText = accuracy + "%";
+      
+      localStorage.setItem('btc5m_stats', JSON.stringify(stats));
+    }
+
+    function resetStats() {
+      if (confirm("¿Deseas reiniciar el contador de aciertos y fallos?")) {
+        stats = { hits: 0, misses: 0, abstained: 0 };
+        updateStatsUI();
+      }
+    }
+
+    // Pedir permiso para notificaciones en Android
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    function sendNotification(title, body) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "icon-192.png" });
+      }
+    }
+
+    // WebSocket Binance en tiempo real
+    const ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_5m");
+
+    ws.onopen = () => {
+      document.getElementById('conn-status').innerText = "Binance conectado";
+      document.getElementById('conn-status').style.background = "rgba(34, 197, 94, 0.15)";
+      document.getElementById('conn-status').style.color = "#22c55e";
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const kline = data.k;
+
+      const currentPrice = parseFloat(kline.c).toFixed(2);
+      const openPrice = parseFloat(kline.o);
+      const isCandleClosed = kline.x;
+
+      document.getElementById('btc-price').innerText = "$" + currentPrice;
+
+      // Cálculo simple de tiempo restante de la vela 5M
+      const now = new Date().getTime();
+      const eventTime = data.E;
+      const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
+      const m = Math.floor(restSec / 60).toString().padStart(2, '0');
+      const s = (restSec % 60).toString().padStart(2, '0');
+      document.getElementById('timer').innerText = `${m}:${s}`;
+
+      // Simulación de modelo predictivo para la vela activa
+      const diff = ((currentPrice - openPrice) / openPrice) * 100;
+      const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
+
+      let direction = diff >= 0 ? "SUBIR" : "BAJAR";
+      let recommendation = confidence > 65 ? "ENTRAR" : "NO ENTRAR";
+
+      const predElem = document.getElementById('pred-direction');
+      predElem.innerText = direction;
+      predElem.className = "prediction-badge " + (direction === "SUBIR" ? "green" : "red");
+
+      document.getElementById('pred-confidence').innerText = confidence + "%";
+      document.getElementById('pred-recommendation').innerText = recommendation;
+      document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
+
+      // Alerta si la confianza supera el 70%
+      if (confidence > 70 && recommendation === "ENTRAR" && (!lastSignal || lastSignal.time !== kline.t)) {
+        sendNotification("¡Señal BTC 5M!", `Dirección: ${direction} | Confianza: ${confidence}%`);
+      }
+
+      // Al cerrar la vela de 5 minutos, evaluamos la predicción registrada
+      if (isCandleClosed) {
+        if (lastSignal) {
+          if (lastSignal.recommendation === "NO ENTRAR") {
+            stats.abstained++;
+          } else {
+            const realDirection = parseFloat(kline.c) >= parseFloat(kline.o) ? "SUBIR" : "BAJAR";
+            if (lastSignal.direction === realDirection) {
+              stats.hits++;
+            } else {
+              stats.misses++;
+            }
+          }
+          updateStatsUI();
+        }
+
+        // Guardamos la señal para la siguiente vela
+        lastSignal = {
+          time: kline.t,
+          direction: direction,
+          confidence: confidence,
+          recommendation: recommendation
+        };
+      }
+    };
+
+    updateStatsUI();
+  </script>
+
+</body>
+</html>
