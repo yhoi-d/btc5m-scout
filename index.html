@@ -2,12 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BTC 5M AI Lab - Beta 0.2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>BTC 5M AI Lab</title>
   <style>
     :root {
       --bg-color: #0b0e14;
       --card-bg: #151a23;
+      --card-border: #1f2735;
       --text-main: #ffffff;
       --text-sub: #8a93a6;
       --green: #22c55e;
@@ -15,13 +16,16 @@
       --yellow: #f59e0b;
       --blue: #3b82f6;
     }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 16px;
+      padding: 16px 16px 80px 16px;
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
+    
+    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -29,127 +33,261 @@
       margin-bottom: 16px;
     }
     .status-badge {
-      font-size: 12px;
-      padding: 4px 8px;
+      font-size: 11px;
+      padding: 4px 10px;
       border-radius: 12px;
       background: rgba(34, 197, 94, 0.15);
       color: var(--green);
+      font-weight: bold;
     }
+    
+    /* Cards */
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
     }
     .card-title {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 8px;
     }
     .price {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
+    
+    /* Layout Grids */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
     .stat-box {
-      background: rgba(255,255,255,0.03);
-      padding: 12px;
-      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--card-border);
+      padding: 14px;
+      border-radius: 10px;
       text-align: center;
     }
     .stat-val {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       margin-top: 4px;
     }
+    
+    /* Text Colors */
     .green { color: var(--green); }
     .red { color: var(--red); }
     .yellow { color: var(--yellow); }
     .blue { color: var(--blue); }
     
     .prediction-badge {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 8px 0;
+      font-size: 26px;
+      font-weight: 800;
+      margin: 6px 0;
     }
+
+    /* Sections Control */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Bottom Navigation Bar */
+    .navbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: #11151d;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-sub);
+      font-size: 11px;
+      text-decoration: none;
+      cursor: pointer;
+      width: 25%;
+    }
+    .nav-item.active {
+      color: var(--blue);
+    }
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+
+    /* Buttons */
     button {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       background: var(--blue);
       border: none;
       color: white;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: bold;
       font-size: 14px;
       cursor: pointer;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Premium Box */
+    .premium-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid #3b82f6;
+    }
+    .premium-price {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--blue);
+      margin: 12px 0;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.8;
     }
   </style>
 </head>
 <body>
 
+  <!-- ENCABEZADO FIJO -->
   <div class="header">
     <div>
-      <h2 style="margin:0;">BTC 5M AI Lab</h2>
-      <span style="font-size: 12px; color: var(--text-sub);">Beta 0.2 · Conexión Binance</span>
+      <h2 style="margin:0; font-size: 20px;">BTC 5M AI Lab</h2>
+      <span style="font-size: 12px; color: var(--text-sub);">Análisis e Indicadores 5M</span>
     </div>
     <div id="conn-status" class="status-badge">Conectando...</div>
   </div>
 
-  <!-- Tarjeta de Precio -->
-  <div class="card">
-    <div class="card-title">Vela Actual BTC/USDT (5M)</div>
-    <div id="btc-price" class="price">$--,---.--</div>
-    <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">
-      Tiempo restante: <span id="timer" class="yellow">--:--</span>
+  <!-- PANTALLA 1: INICIO -->
+  <div id="tab-inicio" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Vela Actual BTC/USDT</div>
+      <div id="btc-price" class="price">$--,---.--</div>
+      <div style="font-size: 13px; color: var(--text-sub); margin-top: 6px;">
+        Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pronóstico en Vivo</div>
+      <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
+      <div style="font-size: 14px; margin-top: 4px;">
+        Confianza estimada: <b id="pred-confidence">--%</b>
+      </div>
+      <div style="font-size: 13px; color: var(--text-sub); margin-top: 8px;">
+        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO VELA</b>
+      </div>
     </div>
   </div>
 
-  <!-- Pronóstico en Vivo -->
-  <div class="card">
-    <div class="card-title">Pronóstico en Vivo</div>
-    <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
-    <div style="font-size: 14px;">
-      Confianza estimada: <b id="pred-confidence">--%</b>
-    </div>
-    <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
-      Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO VELA</b>
+  <!-- PANTALLA 2: ESTADÍSTICAS -->
+  <div id="tab-estadisticas" class="tab-content">
+    <div class="card">
+      <div class="card-title">Rendimiento Histórico</div>
+      <div class="grid-2">
+        <div class="stat-box">
+          <div style="font-size:12px; color:var(--text-sub);">Aciertos</div>
+          <div id="stat-hits" class="stat-val green">0</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:12px; color:var(--text-sub);">Fallos</div>
+          <div id="stat-misses" class="stat-val red">0</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:12px; color:var(--text-sub);">Abstenciones</div>
+          <div id="stat-abstained" class="stat-val yellow">0</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:12px; color:var(--text-sub);">Precisión</div>
+          <div id="stat-accuracy" class="stat-val blue">0.0%</div>
+        </div>
+      </div>
+      <button class="btn-danger" style="margin-top: 16px;" onclick="resetStats()">
+        Reiniciar Estadísticas
+      </button>
     </div>
   </div>
 
-  <!-- Módulo de Estadísticas (Beta 0.2) -->
-  <div class="card">
-    <div class="card-title">Rendimiento Histórico (Beta 0.2)</div>
-    <div class="grid-2">
-      <div class="stat-box">
-        <div style="font-size:12px; color:var(--text-sub);">Aciertos</div>
-        <div id="stat-hits" class="stat-val green">0</div>
-      </div>
-      <div class="stat-box">
-        <div style="font-size:12px; color:var(--text-sub);">Fallos</div>
-        <div id="stat-misses" class="stat-val red">0</div>
-      </div>
-      <div class="stat-box">
-        <div style="font-size:12px; color:var(--text-sub);">Abstenciones</div>
-        <div id="stat-abstained" class="stat-val yellow">0</div>
-      </div>
-      <div class="stat-box">
-        <div style="font-size:12px; color:var(--text-sub);">Precisión</div>
-        <div id="stat-accuracy" class="stat-val blue">0.0%</div>
+  <!-- PANTALLA 3: HISTORIAL -->
+  <div id="tab-historial" class="tab-content">
+    <div class="card">
+      <div class="card-title">Últimas Señales Registradas</div>
+      <div id="history-list" style="font-size: 13px; color: var(--text-sub);">
+        Aún no hay señales cerradas en esta sesión.
       </div>
     </div>
-    <button style="margin-top: 12px; background: rgba(239, 68, 68, 0.2); color: var(--red);" onclick="resetStats()">
-      Reiniciar Estadísticas
-    </button>
+  </div>
+
+  <!-- PANTALLA 4: PREMIUM -->
+  <div id="tab-premium" class="tab-content">
+    <div class="card premium-card">
+      <div class="card-title" style="color:#60a5fa;">Pase Premium</div>
+      <div class="premium-price">$9.900 COP <span style="font-size:14px; color:var(--text-sub); font-weight:normal;">/ mes</span></div>
+      <ul class="feature-list">
+        <li>💎 Sin anuncios interrupciones.</li>
+        <li>📊 Historial completo de señales.</li>
+        <li>📈 Estadísticas avanzadas por período.</li>
+        <li>🔔 Alertas prioritarias configurables.</li>
+      </ul>
+      <button style="background: #2563eb;" onclick="alert('Opción Premium en preparación para Google Play Billing')">
+        Suscribirse Ahora
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <div class="navbar">
+    <div class="nav-item active" onclick="switchTab('inicio', this)">
+      <span class="nav-icon">📊</span>
+      <span>Inicio</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('estadisticas', this)">
+      <span class="nav-icon">📈</span>
+      <span>Estadísticas</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('historial', this)">
+      <span class="nav-icon">📜</span>
+      <span>Historial</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('premium', this)">
+      <span class="nav-icon">💎</span>
+      <span>Premium</span>
+    </div>
   </div>
 
   <script>
-    // Configuración y variables del sistema de métricas
+    // Cambio de Pestañas
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabId).classList.add('active');
+      element.classList.add('active');
+    }
+
+    // Datos y Lógica
     let lastSignal = null;
+    let history = [];
     let stats = JSON.parse(localStorage.getItem('btc5m_stats')) || { hits: 0, misses: 0, abstained: 0 };
 
     function updateStatsUI() {
@@ -165,30 +303,19 @@
     }
 
     function resetStats() {
-      if (confirm("¿Deseas reiniciar el contador de aciertos y fallos?")) {
+      if (confirm("¿Deseas reiniciar el contador de estadísticas?")) {
         stats = { hits: 0, misses: 0, abstained: 0 };
+        history = [];
+        document.getElementById('history-list').innerHTML = "Aún no hay señales cerradas en esta sesión.";
         updateStatsUI();
       }
     }
 
-    // Pedir permiso para notificaciones en Android
-    if ("Notification" in window && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    function sendNotification(title, body) {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, { body: body, icon: "icon-192.png" });
-      }
-    }
-
-    // WebSocket Binance en tiempo real
+    // WebSocket Binance
     const ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_5m");
 
     ws.onopen = () => {
-      document.getElementById('conn-status').innerText = "Binance conectado";
-      document.getElementById('conn-status').style.background = "rgba(34, 197, 94, 0.15)";
-      document.getElementById('conn-status').style.color = "#22c55e";
+      document.getElementById('conn-status').innerText = "Binance activo";
     };
 
     ws.onmessage = (event) => {
@@ -201,15 +328,12 @@
 
       document.getElementById('btc-price').innerText = "$" + currentPrice;
 
-      // Cálculo simple de tiempo restante de la vela 5M
       const now = new Date().getTime();
-      const eventTime = data.E;
       const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
       const m = Math.floor(restSec / 60).toString().padStart(2, '0');
       const s = (restSec % 60).toString().padStart(2, '0');
       document.getElementById('timer').innerText = `${m}:${s}`;
 
-      // Simulación de modelo predictivo para la vela activa
       const diff = ((currentPrice - openPrice) / openPrice) * 100;
       const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
 
@@ -224,28 +348,30 @@
       document.getElementById('pred-recommendation').innerText = recommendation;
       document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
 
-      // Alerta si la confianza supera el 70%
-      if (confidence > 70 && recommendation === "ENTRAR" && (!lastSignal || lastSignal.time !== kline.t)) {
-        sendNotification("¡Señal BTC 5M!", `Dirección: ${direction} | Confianza: ${confidence}%`);
-      }
-
-      // Al cerrar la vela de 5 minutos, evaluamos la predicción registrada
       if (isCandleClosed) {
         if (lastSignal) {
+          let resultText = "";
           if (lastSignal.recommendation === "NO ENTRAR") {
             stats.abstained++;
+            resultText = "⚠️ Abstención";
           } else {
             const realDirection = parseFloat(kline.c) >= parseFloat(kline.o) ? "SUBIR" : "BAJAR";
             if (lastSignal.direction === realDirection) {
               stats.hits++;
+              resultText = "✅ Acierto";
             } else {
               stats.misses++;
+              resultText = "❌ Fallo";
             }
           }
+          
+          // Agregar al historial visual
+          history.unshift(`Vela: $${currentPrice} | Señal: ${lastSignal.direction} | ${resultText}`);
+          document.getElementById('history-list').innerHTML = history.slice(0, 10).map(item => `<div style="padding: 8px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`).join('');
+          
           updateStatsUI();
         }
 
-        // Guardamos la señal para la siguiente vela
         lastSignal = {
           time: kline.t,
           direction: direction,
