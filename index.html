@@ -120,7 +120,7 @@
       background: rgba(255,255,255,0.02);
       border: 2px solid var(--card-border);
       border-radius: 12px;
-      padding: 14px 10px;
+      padding: 12px 10px;
       text-align: center;
       transition: all 0.2s ease;
     }
@@ -135,7 +135,7 @@
       box-shadow: 0 0 12px rgba(248, 81, 73, 0.25);
     }
     .pred-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -143,7 +143,7 @@
       gap: 6px;
     }
     .pred-prob {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-sub);
       margin-top: 4px;
       font-weight: 600;
@@ -154,6 +154,11 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
     .stat-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--card-border);
@@ -162,7 +167,7 @@
       text-align: center;
     }
     .stat-val {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       margin-top: 4px;
     }
@@ -215,6 +220,14 @@
       font-weight: bold;
       cursor: pointer;
     }
+    .btn-green {
+      background: #2ea043;
+      color: white;
+    }
+    .btn-red {
+      background: #da3633;
+      color: white;
+    }
     .btn-danger {
       background: rgba(248, 81, 73, 0.15);
       color: var(--red);
@@ -247,33 +260,21 @@
       transition: background 0.3s ease;
     }
 
-    /* Estilos para la sección de Ajustes */
-    .setting-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .setting-label {
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .setting-sub {
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-top: 2px;
-    }
-    select, input[type="checkbox"] {
-      accent-color: var(--blue);
-    }
-    select {
+    /* Panel Simulador */
+    .amount-btn {
       background: var(--bg-color);
-      color: var(--text-main);
       border: 1px solid var(--card-border);
-      padding: 6px 10px;
+      color: var(--text-main);
+      padding: 8px;
       border-radius: 8px;
       font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .amount-btn.selected {
+      border-color: var(--blue);
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--blue);
     }
   </style>
 </head>
@@ -345,7 +346,53 @@
     </div>
   </div>
 
-  <!-- SECCIÓN 2: ESTUDIO TÉCNICO (PREMIUM) -->
+  <!-- SECCIÓN 2: SIMULADOR DE TRADING DEMO -->
+  <div id="tab-simulador" class="tab-content">
+    <div class="card">
+      <div class="card-title">Balance de Cuenta Demo (Ficticia)</div>
+      <div class="grid-3" style="margin-top: 8px;">
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Saldo Demo</div>
+          <div id="demo-balance" class="stat-val green">$1,000.00</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Operaciones</div>
+          <div id="demo-trades-count" class="stat-val blue">0</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Winrate</div>
+          <div id="demo-winrate" class="stat-val yellow">0.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Operar en Vivo con Señal AI</div>
+      <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">
+        Monto por Operación (USDT Virtual):
+      </div>
+      <div class="grid-4" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
+        <button class="amount-btn selected" onclick="setTradeAmount(10, this)">$10</button>
+        <button class="amount-btn" onclick="setTradeAmount(25, this)">$25</button>
+        <button class="amount-btn" onclick="setTradeAmount(50, this)">$50</button>
+        <button class="amount-btn" onclick="setTradeAmount(100, this)">$100</button>
+      </div>
+
+      <div class="grid-2">
+        <button class="btn-green" onclick="placeDemoTrade('UP')">Comprar UP ↗</button>
+        <button class="btn-red" onclick="placeDemoTrade('DOWN')">Comprar DOWN ↘</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Operación Activa</div>
+      <div id="active-trade-info" style="font-size: 12px; color: var(--text-sub); text-align: center; padding: 6px 0;">
+        No hay operaciones activas en la vela actual.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: ESTUDIO TÉCNICO (PREMIUM) -->
   <div id="tab-estudio" class="tab-content">
     <div class="card" style="border-color: var(--purple);">
       <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span style="background: linear-gradient(135deg, #bc8cff, #58a6ff); color: white; font-size: 9px; padding: 2px 6px; border-radius: 6px; margin-left: 4px;">PREMIUM</span></div>
@@ -378,7 +425,7 @@
     </div>
   </div>
 
-  <!-- SECCIÓN 3: ESTADÍSTICAS -->
+  <!-- SECCIÓN 4: ESTADÍSTICAS & HISTORIAL -->
   <div id="tab-estadisticas" class="tab-content">
     <div class="card">
       <div class="card-title" id="stats-title">Rendimiento Histórico 5M (BTC/USDT)</div>
@@ -404,62 +451,12 @@
         Reiniciar Métricas de Moneda
       </button>
     </div>
-  </div>
 
-  <!-- SECCIÓN 4: HISTORIAL -->
-  <div id="tab-historial" class="tab-content">
     <div class="card">
       <div class="card-title">Historial de Señales (Moneda Actual)</div>
       <div id="history-list" style="font-size: 12px; color: var(--text-sub);">
         Sin historial grabado aún para esta moneda.
       </div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN 5: AJUSTES Y RELOJ UTC -->
-  <div id="tab-ajustes" class="tab-content">
-    <!-- Reloj UTC Servidor -->
-    <div class="card">
-      <div class="card-title">Servidor Binance & Horario UTC</div>
-      <div class="grid-2" style="margin-top: 8px;">
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Hora UTC Binance</div>
-          <div id="clock-utc" class="stat-val blue" style="font-size:16px;">00:00:00</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Hora Local</div>
-          <div id="clock-local" class="stat-val green" style="font-size:16px;">00:00:00</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Configuración de Notificaciones -->
-    <div class="card">
-      <div class="card-title">Configuración de Alertas</div>
-      
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">Notificaciones Push</div>
-          <div class="setting-sub">Alertas al celular sobre señales de alta probabilidad.</div>
-        </div>
-        <input type="checkbox" id="check-notifications" onchange="toggleNotifications(this.checked)" style="transform: scale(1.3);">
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">Umbral de Confianza Requerido</div>
-          <div class="setting-sub">Nivel mínimo para enviar alertas.</div>
-        </div>
-        <select id="select-threshold" onchange="updateThreshold(this.value)">
-          <option value="60">60% Confianza</option>
-          <option value="70" selected>70% Confianza</option>
-          <option value="80">80% Confianza</option>
-        </select>
-      </div>
-
-      <button style="margin-top: 14px; background: rgba(58, 166, 255, 0.15); color: var(--blue); border: 1px solid rgba(58, 166, 255, 0.3);" onclick="testNotification()">
-        Probar Notificación
-      </button>
     </div>
   </div>
 
@@ -469,6 +466,10 @@
       <span style="font-size:16px;">📊</span>
       <span>Inicio</span>
     </div>
+    <div class="nav-item" onclick="switchTab('simulador', this)">
+      <span style="font-size:16px;">🎮</span>
+      <span>Demo</span>
+    </div>
     <div class="nav-item" onclick="switchTab('estudio', this)">
       <span style="font-size:16px;">🧠</span>
       <span>Estudio</span>
@@ -476,14 +477,6 @@
     <div class="nav-item" onclick="switchTab('estadisticas', this)">
       <span style="font-size:16px;">📈</span>
       <span>Métricas</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('historial', this)">
-      <span style="font-size:16px;">📜</span>
-      <span>Historial</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('ajustes', this)">
-      <span style="font-size:16px;">⚙️</span>
-      <span>Ajustes</span>
     </div>
   </div>
 
@@ -496,8 +489,16 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
-    let alertThreshold = 70;
-    let pushEnabled = false;
+    
+    // Variables Simulador Demo
+    let demoAmount = 10;
+    let activeTrade = null;
+    let demoData = JSON.parse(localStorage.getItem('btc5m_demo_account')) || {
+      balance: 1000,
+      wins: 0,
+      losses: 0,
+      totalTrades: 0
+    };
 
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
@@ -509,6 +510,7 @@
 
     function saveToStorage() {
       localStorage.setItem('btc5m_persistent_stats', JSON.stringify(coinStats));
+      localStorage.setItem('btc5m_demo_account', JSON.stringify(demoData));
     }
 
     function switchTab(tabId, element) {
@@ -518,39 +520,79 @@
       element.classList.add('active');
     }
 
-    // Actualización del Reloj UTC y Local
-    setInterval(() => {
-      const d = new Date();
-      document.getElementById('clock-utc').innerText = d.toUTCString().split(' ')[4];
-      document.getElementById('clock-local').innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    function updateDemoUI() {
+      document.getElementById('demo-balance').innerText = `$${demoData.balance.toFixed(2)}`;
+      document.getElementById('demo-trades-count').innerText = demoData.totalTrades;
+      const winrate = demoData.totalTrades > 0 ? ((demoData.wins / demoData.totalTrades) * 100).toFixed(1) : "0.0";
+      document.getElementById('demo-winrate').innerText = `${winrate}%`;
+    }
 
+    function setTradeAmount(amount, element) {
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      demoAmount = amount;
+    }
+
+    function placeDemoTrade(type) {
+      if (activeTrade) {
+        alert("Ya tienes una operación activa en la vela actual.");
+        return;
+      }
+      if (demoData.balance < demoAmount) {
+        alert("Saldo Demo insuficiente.");
+        return;
+      }
+
+      const currentPrice = parseFloat(document.getElementById('val-current').innerText.replace('$', '').replace(',', ''));
+      activeTrade = {
+        symbol: currentSymbol,
+        type: type,
+        entryPrice: currentPrice,
+        amount: demoAmount
+      };
+
+      demoData.balance -= demoAmount;
+      saveToStorage();
+      updateDemoUI();
+
+      document.getElementById('active-trade-info').innerHTML = `
+        Operación: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | Entrada: <b>$${currentPrice.toFixed(2)}</b> | Monto: <b>$${demoAmount} USD</b>
+      `;
+    }
+
+    function resolveDemoTrade(closePrice) {
+      if (!activeTrade) return;
+
+      const isWin = (activeTrade.type === 'UP' && closePrice > activeTrade.entryPrice) ||
+                    (activeTrade.type === 'DOWN' && closePrice < activeTrade.entryPrice);
+
+      demoData.totalTrades++;
+      if (isWin) {
+        demoData.wins++;
+        const profit = activeTrade.amount * 1.85; // Retorno del 85%
+        demoData.balance += profit;
+        alert(`🎉 ¡Operación Ganada! Ganancia: +$${(activeTrade.amount * 0.85).toFixed(2)} USDT`);
+      } else {
+        demoData.losses++;
+        alert(`❌ Operación Perdida: -$${activeTrade.amount} USDT`);
+      }
+
+      activeTrade = null;
+      document.getElementById('active-trade-info').innerText = "No hay operaciones activas en la vela actual.";
+      saveToStorage();
+      updateDemoUI();
+    }
+
+    // Temporizador fluído
+    setInterval(() => {
       if (candleCloseTime > 0) {
-        const now = d.getTime();
+        const now = new Date().getTime();
         const restSec = Math.max(0, Math.floor((candleCloseTime - now) / 1000));
         const m = Math.floor(restSec / 60).toString().padStart(2, '0');
         const s = (restSec % 60).toString().padStart(2, '0');
         document.getElementById('timer').innerText = `${m}:${s}`;
       }
     }, 1000);
-
-    function toggleNotifications(enabled) {
-      pushEnabled = enabled;
-      if (enabled && "Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-      }
-    }
-
-    function updateThreshold(val) {
-      alertThreshold = parseInt(val);
-    }
-
-    function testNotification() {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("BTC 5M AI Lab Pro", { body: "¡Prueba de alerta exitosa! Las señales de alta confianza llegarán aquí." });
-      } else {
-        alert("Debes autorizar los permisos de notificación en tu celular.");
-      }
-    }
 
     function initChart() {
       const ctx = document.getElementById('liveChart').getContext('2d');
@@ -721,21 +763,14 @@
         }
 
         let confidence = Math.max(upProb, downProb);
-        let recommendation = confidence >= alertThreshold ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
+        let recommendation = confidence > 65 ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
 
-        // Disparar Notificación Push si supera el umbral
-        if (pushEnabled && confidence >= alertThreshold && recommendation.includes("ENTRAR EN") && (!lastSignal || lastSignal.time !== kline.t)) {
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification(`Señal Alta Confianza (${currentLabel})`, {
-              body: `Dirección: ${diffPercent >= 0 ? 'UP' : 'DOWN'} | Confianza: ${confidence}%`
-            });
-          }
-        }
-
-        // Guardar al cerrar la vela de 5M
+        // Al cerrar la vela de 5 minutos, resolvemos la operación demo
         if (isCandleClosed) {
+          resolveDemoTrade(currentPrice);
+
           if (lastSignal) {
             let resultText = "";
             if (lastSignal.recommendation.includes("NO ENTRAR")) {
@@ -775,6 +810,7 @@
       connectWebSocket();
       updateStatsUI();
       renderHistory();
+      updateDemoUI();
     };
   </script>
 
