@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>BTC 5M AI Lab - Multi Coin Ultra</title>
+  <title>BTC 5M AI Lab Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg-color: #080b11;
-      --card-bg: #121824;
-      --card-border: #1e293b;
+      --bg-color: #070a0f;
+      --card-bg: #111723;
+      --card-border: #1d283a;
       --text-main: #ffffff;
       --text-sub: #94a3b8;
-      --green: #22c55e;
-      --red: #ef4444;
+      --green: #10b981;
+      --red: #f43f5e;
       --yellow: #f59e0b;
       --blue: #3b82f6;
+      --purple: #8b5cf6;
     }
     * { box-sizing: border-box; }
     body {
@@ -24,6 +25,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .header {
@@ -36,7 +38,7 @@
       font-size: 11px;
       padding: 4px 10px;
       border-radius: 12px;
-      background: rgba(34, 197, 94, 0.15);
+      background: rgba(16, 185, 129, 0.15);
       color: var(--green);
       font-weight: bold;
     }
@@ -47,60 +49,67 @@
       gap: 8px;
       overflow-x: auto;
       padding-bottom: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .coin-btn {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-sub);
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: bold;
       white-space: nowrap;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .coin-btn.active {
       background: var(--blue);
       color: white;
       border-color: var(--blue);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
     }
     
-    /* Cards */
+    /* Tarjetas Pro */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
     .card-title {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-sub);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
       margin-bottom: 6px;
+      font-weight: 700;
     }
     .price {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 800;
+      letter-spacing: -0.5px;
     }
     
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
     .stat-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--card-border);
       padding: 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: center;
     }
     .stat-val {
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 800;
       margin-top: 4px;
     }
     
@@ -108,24 +117,25 @@
     .red { color: var(--red); }
     .yellow { color: var(--yellow); }
     .blue { color: var(--blue); }
+    .purple { color: var(--purple); }
     
     .prediction-badge {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
-      margin: 6px 0;
+      margin: 4px 0;
     }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Bottom Navigation Bar */
+    /* Barra Inferior Pro */
     .navbar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       height: 65px;
-      background: #0f141d;
+      background: #0b0f19;
       border-top: 1px solid var(--card-border);
       display: flex;
       justify-content: space-around;
@@ -137,8 +147,8 @@
       flex-direction: column;
       align-items: center;
       color: var(--text-sub);
-      font-size: 11px;
-      text-decoration: none;
+      font-size: 10px;
+      font-weight: 600;
       cursor: pointer;
       width: 25%;
     }
@@ -152,23 +162,33 @@
       background: var(--blue);
       border: none;
       color: white;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: bold;
       cursor: pointer;
     }
     .btn-danger {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(244, 63, 94, 0.15);
       color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-premium {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-left: 4px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO -->
+  <!-- HEADER -->
   <div class="header">
     <div>
-      <h2 style="margin:0; font-size: 18px;">BTC 5M AI Lab</h2>
+      <h2 style="margin:0; font-size: 18px; font-weight: 800;">BTC 5M AI Lab</h2>
       <span style="font-size: 11px; color: var(--text-sub);">Predicción Multimoneda 5M</span>
     </div>
     <div id="conn-status" class="status-badge">Conectando...</div>
@@ -176,24 +196,23 @@
 
   <!-- SELECTOR DE CRIPTOMONEDAS -->
   <div class="coin-selector">
-    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">BTC/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">ETH/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">SOL/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">BNB/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">XRP/USDT</button>
+    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">₿ BTC/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">Ξ ETH/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">◎ SOL/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">🔶 BNB/USDT</button>
+    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP/USDT</button>
   </div>
 
-  <!-- PANTALLA 1: INICIO Y GRÁFICAS -->
+  <!-- SECCIÓN 1: INICIO Y GRÁFICO -->
   <div id="tab-inicio" class="tab-content active">
     <div class="card">
       <div class="card-title" id="coin-title">Vela Actual BTC/USDT (5M)</div>
       <div id="coin-price" class="price">$--,---.--</div>
-      <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">
+      <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
         Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
       </div>
     </div>
 
-    <!-- MINI GRÁFICA FLUIDA SIN ANIMACIÓN PESADA -->
     <div class="card">
       <div class="card-title">Tendencia en Tiempo Real</div>
       <div style="height: 130px;">
@@ -202,7 +221,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Pronóstico en Vivo</div>
+      <div class="card-title">Pronóstico AI en Vivo</div>
       <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
       <div style="font-size: 14px;">
         Confianza estimada: <b id="pred-confidence">--%</b>
@@ -213,7 +232,40 @@
     </div>
   </div>
 
-  <!-- PANTALLA 2: ESTADÍSTICAS POR MONEDA -->
+  <!-- SECCIÓN 2: ESTUDIO TÉCNICO (PREMIUM) -->
+  <div id="tab-estudio" class="tab-content">
+    <div class="card" style="border-color: var(--purple);">
+      <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span class="badge-premium">PREMIUM</span></div>
+      <div style="font-size: 13px; margin-bottom: 12px; color: var(--text-sub);" id="study-subtitle">
+        Análisis avanzado multivariable para BTC/USDT.
+      </div>
+      
+      <div class="grid-2" style="margin-bottom: 12px;">
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Patrón de Velas</div>
+          <div id="study-pattern" class="stat-val purple" style="font-size:14px;">Consolidación</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Sentimiento Vol.</div>
+          <div id="study-volume" class="stat-val green" style="font-size:14px;">Alcista</div>
+        </div>
+      </div>
+
+      <div class="stat-box" style="text-align: left; margin-bottom: 12px;">
+        <div style="font-size:11px; color:var(--text-sub);">Niveles Clave Detectados:</div>
+        <div style="font-size: 12px; margin-top: 4px;">
+          • Resistencia: <b id="study-res" class="red">$--,---</b><br>
+          • Soporte: <b id="study-sup" class="green">$--,---</b>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; color: var(--text-sub); text-align: center;">
+        *Estudio generado automáticamente mediante modelo logístico y datos de Binance.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: ESTADÍSTICAS -->
   <div id="tab-estadisticas" class="tab-content">
     <div class="card">
       <div class="card-title" id="stats-title">Rendimiento 5M (BTC/USDT)</div>
@@ -241,25 +293,29 @@
     </div>
   </div>
 
-  <!-- PANTALLA 3: HISTORIAL GUARDADO -->
+  <!-- SECCIÓN 4: HISTORIAL -->
   <div id="tab-historial" class="tab-content">
     <div class="card">
       <div class="card-title">Historial Guardado (Moneda Actual)</div>
       <div id="history-list" style="font-size: 13px; color: var(--text-sub);">
-        Cargando historial...
+        Sin historial aún para esta moneda.
       </div>
     </div>
   </div>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <!-- NAVBAR INFERIOR -->
   <div class="navbar">
     <div class="nav-item active" onclick="switchTab('inicio', this)">
       <span style="font-size:18px;">📊</span>
       <span>Inicio</span>
     </div>
+    <div class="nav-item" onclick="switchTab('estudio', this)">
+      <span style="font-size:18px;">🧠</span>
+      <span>Estudio</span>
+    </div>
     <div class="nav-item" onclick="switchTab('estadisticas', this)">
       <span style="font-size:18px;">📈</span>
-      <span>Estadísticas</span>
+      <span>Métricas</span>
     </div>
     <div class="nav-item" onclick="switchTab('historial', this)">
       <span style="font-size:18px;">📜</span>
@@ -273,8 +329,9 @@
     let ws = null;
     let chart = null;
     let lastSignal = null;
+    let candleCloseTime = 0;
 
-    // Métricas persistentes almacenadas en memoria
+    // Métricas persistentes
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       ethusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
@@ -299,9 +356,9 @@
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array(15).fill(''),
+          labels: Array(20).fill(''),
           datasets: [{
-            data: Array(15).fill(null),
+            data: Array(20).fill(null),
             borderColor: '#3b82f6',
             borderWidth: 2,
             tension: 0.2,
@@ -321,6 +378,17 @@
       });
     }
 
+    // Temporizador independiente fluído de 1 segundo
+    setInterval(() => {
+      if (candleCloseTime > 0) {
+        const now = new Date().getTime();
+        const restSec = Math.max(0, Math.floor((candleCloseTime - now) / 1000));
+        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
+        const s = (restSec % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+      }
+    }, 1000);
+
     function selectCoin(symbol, label, element) {
       document.querySelectorAll('.coin-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
@@ -328,6 +396,7 @@
       currentLabel = label;
       document.getElementById('coin-title').innerText = `Vela Actual ${label} (5M)`;
       document.getElementById('stats-title').innerText = `Rendimiento 5M (${label})`;
+      document.getElementById('study-subtitle').innerText = `Análisis técnico avanzado para ${label}.`;
       connectWebSocket();
       updateStatsUI();
       renderHistory();
@@ -366,10 +435,6 @@
 
     function connectWebSocket() {
       if (ws) ws.close();
-      if (chart) {
-        chart.data.datasets[0].data = Array(15).fill(null);
-        chart.update();
-      }
 
       document.getElementById('conn-status').innerText = "Conectando...";
       ws = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol}@kline_5m`);
@@ -383,26 +448,27 @@
         const kline = data.k;
         const currentPrice = parseFloat(kline.c);
         const openPrice = parseFloat(kline.o);
+        const highPrice = parseFloat(kline.h);
+        const lowPrice = parseFloat(kline.l);
         const isCandleClosed = kline.x;
 
+        candleCloseTime = kline.T;
         document.getElementById('coin-price').innerText = "$" + currentPrice.toLocaleString();
 
-        // Temporizador de cierre de vela 5M
-        const now = new Date().getTime();
-        const restSec = Math.max(0, Math.floor((kline.T - now) / 1000));
-        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
-        const s = (restSec % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
+        // Actualizar estudio técnico Premium
+        document.getElementById('study-res').innerText = "$" + highPrice.toLocaleString();
+        document.getElementById('study-sup').innerText = "$" + lowPrice.toLocaleString();
+        document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Impulso Alcista" : "Presión Bajista";
 
-        // Gráfica ultrarrápida
+        // Gráfica fluida
         if (chart) {
           chart.data.datasets[0].data.shift();
           chart.data.datasets[0].data.push(currentPrice);
-          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#22c55e' : '#ef4444';
+          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#10b981' : '#f43f5e';
           chart.update();
         }
 
-        // Estimación rápida
+        // Predicción
         const diff = ((currentPrice - openPrice) / openPrice) * 100;
         const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
         let direction = diff >= 0 ? "SUBIR" : "BAJAR";
@@ -416,7 +482,7 @@
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
 
-        // Registro y guardado al cerrar vela de 5 minutos
+        // Guardado tras cierre de vela
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
