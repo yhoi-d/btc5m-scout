@@ -7,21 +7,22 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg-color: #070a0f;
-      --card-bg: #111723;
-      --card-border: #1d283a;
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #21262d;
       --text-main: #ffffff;
-      --text-sub: #94a3b8;
-      --green: #10b981;
-      --red: #f43f5e;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
+      --text-sub: #8b949e;
+      --green: #2ea043;
+      --red: #f85149;
+      --orange: #f0883e;
+      --yellow: #d29922;
+      --blue: #58a6ff;
+      --purple: #bc8cff;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 16px 16px 85px 16px;
+      padding: 14px 14px 85px 14px;
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -38,7 +39,7 @@
       font-size: 11px;
       padding: 4px 10px;
       border-radius: 12px;
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(46, 160, 67, 0.15);
       color: var(--green);
       font-weight: bold;
     }
@@ -49,15 +50,15 @@
       gap: 8px;
       overflow-x: auto;
       padding-bottom: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .coin-btn {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-sub);
-      padding: 8px 14px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: bold;
       white-space: nowrap;
       cursor: pointer;
@@ -69,17 +70,17 @@
       background: var(--blue);
       color: white;
       border-color: var(--blue);
-      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
     }
     
-    /* Tarjetas Pro */
+    /* Tarjeta Estilo Binario / Trading */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
     .card-title {
       font-size: 11px;
@@ -89,10 +90,23 @@
       margin-bottom: 6px;
       font-weight: 700;
     }
-    .price {
-      font-size: 30px;
+    
+    /* Header de Cotización estilo Imagen */
+    .trading-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .trading-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+    .trading-val {
+      font-size: 16px;
       font-weight: 800;
-      letter-spacing: -0.5px;
     }
     
     .grid-2 {
@@ -100,16 +114,11 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-    .grid-4 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 6px;
-    }
     .stat-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--card-border);
       padding: 10px;
-      border-radius: 12px;
+      border-radius: 10px;
       text-align: center;
     }
     .stat-val {
@@ -120,12 +129,13 @@
     
     .green { color: var(--green); }
     .red { color: var(--red); }
+    .orange { color: var(--orange); }
     .yellow { color: var(--yellow); }
     .blue { color: var(--blue); }
     .purple { color: var(--purple); }
     
     .prediction-badge {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       margin: 4px 0;
     }
@@ -133,14 +143,14 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Barra Inferior Pro */
+    /* Navbar Inferior */
     .navbar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 65px;
-      background: #0b0f19;
+      height: 60px;
+      background: #0d1117;
       border-top: 1px solid var(--card-border);
       display: flex;
       justify-content: space-around;
@@ -167,18 +177,18 @@
       background: var(--blue);
       border: none;
       color: white;
-      border-radius: 12px;
+      border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
     }
     .btn-danger {
-      background: rgba(244, 63, 94, 0.15);
+      background: rgba(248, 81, 73, 0.15);
       color: var(--red);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      border: 1px solid rgba(248, 81, 73, 0.3);
     }
 
     .badge-premium {
-      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      background: linear-gradient(135deg, #bc8cff, #58a6ff);
       color: white;
       font-size: 9px;
       padding: 2px 6px;
@@ -187,14 +197,13 @@
       font-weight: bold;
     }
 
-    .ohlc-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed var(--card-border);
+    .target-badge {
+      background: #21262d;
+      color: #8b949e;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -203,53 +212,58 @@
   <!-- HEADER -->
   <div class="header">
     <div>
-      <h2 style="margin:0; font-size: 18px; font-weight: 800;">BTC 5M AI Lab</h2>
-      <span style="font-size: 11px; color: var(--text-sub);">Predicción Multimoneda 5M</span>
+      <h2 style="margin:0; font-size: 17px; font-weight: 800;" id="app-header-title">BTC Up or Down 5m</h2>
+      <span style="font-size: 11px; color: var(--text-sub);">Predicción de Precio en Tiempo Real</span>
     </div>
     <div id="conn-status" class="status-badge">Conectando...</div>
   </div>
 
   <!-- SELECTOR DE CRIPTOMONEDAS -->
   <div class="coin-selector">
-    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">₿ BTC/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">Ξ ETH/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">◎ SOL/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">🔶 BNB/USDT</button>
-    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP/USDT</button>
+    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">₿ BTC</button>
+    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">Ξ ETH</button>
+    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">◎ SOL</button>
+    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">🔶 BNB</button>
+    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP</button>
   </div>
 
-  <!-- SECCIÓN 1: INICIO Y GRÁFICO COMPLETO -->
+  <!-- SECCIÓN 1: INICIO Y GRÁFICO ESTILO TRADING -->
   <div id="tab-inicio" class="tab-content active">
+    
+    <!-- ENCABEZADO TIPO TARGET -->
     <div class="card">
-      <div class="card-title" id="coin-title">Vela Actual BTC/USDT (5M)</div>
-      <div id="coin-price" class="price">$--,---.--</div>
-      
-      <div class="ohlc-info">
-        <span>Inicio (Open): <b id="val-open" class="blue">$--.--</b></span>
-        <span>Máx: <b id="val-high" class="green">$--.--</b></span>
-        <span>Mín: <b id="val-low" class="red">$--.--</b></span>
-      </div>
-
-      <div style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">
-        Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
+      <div class="trading-header">
+        <div>
+          <div class="trading-label">Precio inicial</div>
+          <div id="val-open" class="trading-val" style="color:#c9d1d9;">$--.----</div>
+        </div>
+        <div>
+          <div class="trading-label">Precio actual <span id="val-diff" class="green" style="font-size:10px;">+$0.00</span></div>
+          <div id="val-current" class="trading-val orange">$--.----</div>
+        </div>
+        <div>
+          <div class="trading-label">Cuenta regresiva</div>
+          <div id="timer" class="trading-val red">00:00</div>
+        </div>
       </div>
     </div>
 
-    <!-- GRÁFICO DE RECORRIDO DE VELA COMPLETA -->
+    <!-- GRÁFICO DE PASOS (STEPPED LINE) CON TARGET -->
     <div class="card">
-      <div class="card-title" style="display:flex; justify-content:space-between;">
-        <span>Recorrido de la Vela (0:00 - 5:00)</span>
-        <span style="font-size:10px; color:var(--text-sub);">Apertura vs. Cierre</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="card-title" style="margin:0;">Trayectoria 5M</span>
+        <span class="target-badge">Target (Apertura)</span>
       </div>
-      <div style="height: 160px; position: relative;">
+      <div style="height: 180px; position: relative;">
         <canvas id="liveChart"></canvas>
       </div>
     </div>
 
+    <!-- PRONÓSTICO EN VIVO -->
     <div class="card">
-      <div class="card-title">Pronóstico AI en Vivo</div>
+      <div class="card-title">Pronóstico AI Estimado</div>
       <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
-      <div style="font-size: 14px;">
+      <div style="font-size: 13px;">
         Confianza estimada: <b id="pred-confidence">--%</b>
       </div>
       <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
@@ -262,31 +276,31 @@
   <div id="tab-estudio" class="tab-content">
     <div class="card" style="border-color: var(--purple);">
       <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span class="badge-premium">PREMIUM</span></div>
-      <div style="font-size: 13px; margin-bottom: 12px; color: var(--text-sub);" id="study-subtitle">
-        Análisis avanzado multivariable para BTC/USDT.
+      <div style="font-size: 12px; margin-bottom: 12px; color: var(--text-sub);" id="study-subtitle">
+        Análisis de fuerza de mercado para BTC/USDT.
       </div>
       
       <div class="grid-2" style="margin-bottom: 12px;">
         <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Patrón de Velas</div>
-          <div id="study-pattern" class="stat-val purple" style="font-size:14px;">Consolidación</div>
+          <div style="font-size:10px; color:var(--text-sub);">Tendencia Actual</div>
+          <div id="study-pattern" class="stat-val purple" style="font-size:13px;">Consolidación</div>
         </div>
         <div class="stat-box">
           <div style="font-size:10px; color:var(--text-sub);">Sentimiento Vol.</div>
-          <div id="study-volume" class="stat-val green" style="font-size:14px;">Alcista</div>
+          <div id="study-volume" class="stat-val green" style="font-size:13px;">Alcista</div>
         </div>
       </div>
 
       <div class="stat-box" style="text-align: left; margin-bottom: 12px;">
-        <div style="font-size:11px; color:var(--text-sub);">Niveles Clave Detectados:</div>
+        <div style="font-size:11px; color:var(--text-sub);">Niveles Extremos de la Vela:</div>
         <div style="font-size: 12px; margin-top: 4px;">
-          • Resistencia: <b id="study-res" class="red">$--,---</b><br>
-          • Soporte: <b id="study-sup" class="green">$--,---</b>
+          • Máximo Alcanzado: <b id="study-res" class="green">$--.----</b><br>
+          • Mínimo Alcanzado: <b id="study-sup" class="red">$--.----</b>
         </div>
       </div>
 
       <div style="font-size: 11px; color: var(--text-sub); text-align: center;">
-        *Estudio generado automáticamente mediante modelo logístico y datos de Binance.
+        *Análisis calculado en tiempo real con datos directos de Binance.
       </div>
     </div>
   </div>
@@ -294,7 +308,7 @@
   <!-- SECCIÓN 3: ESTADÍSTICAS -->
   <div id="tab-estadisticas" class="tab-content">
     <div class="card">
-      <div class="card-title" id="stats-title">Rendimiento 5M (BTC/USDT)</div>
+      <div class="card-title" id="stats-title">Rendimiento Histórico 5M (BTC/USDT)</div>
       <div class="grid-2">
         <div class="stat-box">
           <div style="font-size:11px; color:var(--text-sub);">Aciertos</div>
@@ -322,9 +336,9 @@
   <!-- SECCIÓN 4: HISTORIAL -->
   <div id="tab-historial" class="tab-content">
     <div class="card">
-      <div class="card-title">Historial Guardado (Moneda Actual)</div>
-      <div id="history-list" style="font-size: 13px; color: var(--text-sub);">
-        Sin historial aún para esta moneda.
+      <div class="card-title">Historial de Señales (Moneda Actual)</div>
+      <div id="history-list" style="font-size: 12px; color: var(--text-sub);">
+        Sin historial grabado aún para esta moneda.
       </div>
     </div>
   </div>
@@ -358,8 +372,8 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
+    let initialOpenPrice = 0;
 
-    // Métricas persistentes
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
       ethusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
@@ -387,19 +401,20 @@
           labels: [],
           datasets: [
             {
-              label: 'Precio Vela',
+              label: 'Precio Actual',
               data: [],
-              borderColor: '#3b82f6',
+              borderColor: '#f0883e',
               borderWidth: 2,
-              tension: 0.1,
-              pointRadius: 0
+              stepped: true, // Estilo Escalón como en la foto de referencia
+              pointRadius: 0,
+              pointHoverRadius: 0
             },
             {
-              label: 'Apertura',
+              label: 'Target (Inicial)',
               data: [],
-              borderColor: 'rgba(148, 163, 184, 0.5)',
-              borderWidth: 1,
-              borderDash: [4, 4],
+              borderColor: 'rgba(139, 148, 158, 0.6)',
+              borderWidth: 1.5,
+              borderDash: [5, 5], // Línea Punteada Target
               pointRadius: 0
             }
           ]
@@ -410,8 +425,14 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            x: { display: false },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+            x: { 
+              grid: { color: 'rgba(255,255,255,0.03)' },
+              ticks: { color: '#8b949e', font: { size: 9 }, maxRotation: 0 }
+            },
+            y: { 
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#8b949e', font: { size: 10 } }
+            }
           }
         }
       });
@@ -434,9 +455,9 @@
       currentSymbol = symbol;
       currentLabel = label;
       candlePrices = [];
-      document.getElementById('coin-title').innerText = `Vela Actual ${label} (5M)`;
-      document.getElementById('stats-title').innerText = `Rendimiento 5M (${label})`;
-      document.getElementById('study-subtitle').innerText = `Análisis técnico avanzado para ${label}.`;
+      document.getElementById('app-header-title').innerText = `${label} Up or Down 5m`;
+      document.getElementById('stats-title').innerText = `Rendimiento Histórico 5M (${label})`;
+      document.getElementById('study-subtitle').innerText = `Análisis de fuerza de mercado para ${label}.`;
       connectWebSocket();
       updateStatsUI();
       renderHistory();
@@ -456,7 +477,7 @@
     function renderHistory() {
       const list = coinStats[currentSymbol].history || [];
       if (list.length === 0) {
-        document.getElementById('history-list').innerHTML = "Sin historial aún para esta moneda.";
+        document.getElementById('history-list').innerHTML = "Sin historial grabado aún para esta moneda.";
       } else {
         document.getElementById('history-list').innerHTML = list.map(item => 
           `<div style="padding: 10px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`
@@ -493,50 +514,61 @@
         const isCandleClosed = kline.x;
 
         candleCloseTime = kline.T;
-        document.getElementById('coin-price').innerText = "$" + currentPrice.toLocaleString();
-        document.getElementById('val-open').innerText = "$" + openPrice.toLocaleString();
-        document.getElementById('val-high').innerText = "$" + highPrice.toLocaleString();
-        document.getElementById('val-low').innerText = "$" + lowPrice.toLocaleString();
+        initialOpenPrice = openPrice;
 
-        // Si inició una nueva vela, reiniciamos el historial de la gráfica
+        // Formato con decimales dinámicos según el precio
+        const dec = currentPrice < 10 ? 4 : 2;
+        const diffVal = currentPrice - openPrice;
+        const diffSign = diffVal >= 0 ? "+$" : "-$";
+
+        document.getElementById('val-open').innerText = "$" + openPrice.toFixed(dec);
+        document.getElementById('val-current').innerText = "$" + currentPrice.toFixed(dec);
+        document.getElementById('val-current').className = "trading-val " + (diffVal >= 0 ? "green" : "orange");
+        
+        const diffElem = document.getElementById('val-diff');
+        diffElem.innerText = `${diffSign}${Math.abs(diffVal).toFixed(2)}`;
+        diffElem.className = diffVal >= 0 ? "green" : "red";
+
+        // Si inició una nueva vela de 5 minutos, limpiamos la gráfica
         if (currentCandleStart !== kline.t) {
           currentCandleStart = kline.t;
           candlePrices = [];
         }
 
-        candlePrices.push(currentPrice);
+        const timeStr = new Date(data.E).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        candlePrices.push({ price: currentPrice, time: timeStr });
 
-        // Actualizar Estudio Premium
-        document.getElementById('study-res').innerText = "$" + highPrice.toLocaleString();
-        document.getElementById('study-sup').innerText = "$" + lowPrice.toLocaleString();
-        document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Impulso Alcista" : "Presión Bajista";
+        // Estudio Técnico
+        document.getElementById('study-res').innerText = "$" + highPrice.toFixed(dec);
+        document.getElementById('study-sup').innerText = "$" + lowPrice.toFixed(dec);
+        document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Escalón Alcista" : "Presión Bajista";
 
-        // Gráfica del Recorrido Completo de la Vela
+        // Gráfica de Pasos (Stepped Target)
         if (chart) {
-          chart.data.labels = candlePrices.map((_, i) => i);
-          chart.data.datasets[0].data = candlePrices;
-          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#10b981' : '#f43f5e';
+          chart.data.labels = candlePrices.map(p => p.time);
+          chart.data.datasets[0].data = candlePrices.map(p => p.price);
+          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#2ea043' : '#f0883e';
           
-          // Línea horizontal del precio de apertura
+          // Línea Punteada Target (Precio Inicial)
           chart.data.datasets[1].data = Array(candlePrices.length).fill(openPrice);
           chart.update();
         }
 
-        // Predicción
-        const diff = ((currentPrice - openPrice) / openPrice) * 100;
-        const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diff) * 100)).toFixed(1);
-        let direction = diff >= 0 ? "SUBIR" : "BAJAR";
+        // Predicción AI
+        const diffPercent = ((currentPrice - openPrice) / openPrice) * 100;
+        const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diffPercent) * 100)).toFixed(1);
+        let direction = diffPercent >= 0 ? "UP (SUBIR)" : "DOWN (BAJAR)";
         let recommendation = confidence > 65 ? "ENTRAR" : "NO ENTRAR";
 
         const predElem = document.getElementById('pred-direction');
         predElem.innerText = direction;
-        predElem.className = "prediction-badge " + (direction === "SUBIR" ? "green" : "red");
+        predElem.className = "prediction-badge " + (diffPercent >= 0 ? "green" : "red");
 
         document.getElementById('pred-confidence').innerText = confidence + "%";
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
 
-        // Guardado al cerrar vela
+        // Guardar al cerrar la vela de 5M
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
@@ -544,7 +576,7 @@
               coinStats[currentSymbol].abstained++;
               resultText = "⚠️ Abstención";
             } else {
-              const realDirection = currentPrice >= openPrice ? "SUBIR" : "BAJAR";
+              const realDirection = currentPrice >= openPrice ? "UP (SUBIR)" : "DOWN (BAJAR)";
               if (lastSignal.direction === realDirection) {
                 coinStats[currentSymbol].hits++;
                 resultText = "✅ Acierto";
@@ -555,7 +587,7 @@
             }
             
             const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Open: $${openPrice} | Close: $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
+            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Inicial: $${openPrice.toFixed(dec)} | Cierre: $${currentPrice.toFixed(dec)} | Pred: ${lastSignal.direction} | ${resultText}`);
             
             saveToStorage();
             updateStatsUI();
