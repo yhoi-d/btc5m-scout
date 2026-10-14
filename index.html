@@ -100,15 +100,20 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+    }
     .stat-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--card-border);
-      padding: 12px;
+      padding: 10px;
       border-radius: 12px;
       text-align: center;
     }
     .stat-val {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
       margin-top: 4px;
     }
@@ -181,6 +186,16 @@
       margin-left: 4px;
       font-weight: bold;
     }
+
+    .ohlc-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--card-border);
+    }
   </style>
 </head>
 <body>
@@ -203,19 +218,30 @@
     <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP/USDT</button>
   </div>
 
-  <!-- SECCIÓN 1: INICIO Y GRÁFICO -->
+  <!-- SECCIÓN 1: INICIO Y GRÁFICO COMPLETO -->
   <div id="tab-inicio" class="tab-content active">
     <div class="card">
       <div class="card-title" id="coin-title">Vela Actual BTC/USDT (5M)</div>
       <div id="coin-price" class="price">$--,---.--</div>
-      <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
+      
+      <div class="ohlc-info">
+        <span>Inicio (Open): <b id="val-open" class="blue">$--.--</b></span>
+        <span>Máx: <b id="val-high" class="green">$--.--</b></span>
+        <span>Mín: <b id="val-low" class="red">$--.--</b></span>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">
         Tiempo restante: <span id="timer" class="yellow" style="font-weight:bold;">--:--</span>
       </div>
     </div>
 
+    <!-- GRÁFICO DE RECORRIDO DE VELA COMPLETA -->
     <div class="card">
-      <div class="card-title">Tendencia en Tiempo Real</div>
-      <div style="height: 130px;">
+      <div class="card-title" style="display:flex; justify-content:space-between;">
+        <span>Recorrido de la Vela (0:00 - 5:00)</span>
+        <span style="font-size:10px; color:var(--text-sub);">Apertura vs. Cierre</span>
+      </div>
+      <div style="height: 160px; position: relative;">
         <canvas id="liveChart"></canvas>
       </div>
     </div>
@@ -330,6 +356,8 @@
     let chart = null;
     let lastSignal = null;
     let candleCloseTime = 0;
+    let currentCandleStart = 0;
+    let candlePrices = [];
 
     // Métricas persistentes
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
@@ -356,14 +384,25 @@
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array(20).fill(''),
-          datasets: [{
-            data: Array(20).fill(null),
-            borderColor: '#3b82f6',
-            borderWidth: 2,
-            tension: 0.2,
-            pointRadius: 0
-          }]
+          labels: [],
+          datasets: [
+            {
+              label: 'Precio Vela',
+              data: [],
+              borderColor: '#3b82f6',
+              borderWidth: 2,
+              tension: 0.1,
+              pointRadius: 0
+            },
+            {
+              label: 'Apertura',
+              data: [],
+              borderColor: 'rgba(148, 163, 184, 0.5)',
+              borderWidth: 1,
+              borderDash: [4, 4],
+              pointRadius: 0
+            }
+          ]
         },
         options: {
           animation: false,
@@ -378,7 +417,7 @@
       });
     }
 
-    // Temporizador independiente fluído de 1 segundo
+    // Temporizador fluído
     setInterval(() => {
       if (candleCloseTime > 0) {
         const now = new Date().getTime();
@@ -394,6 +433,7 @@
       element.classList.add('active');
       currentSymbol = symbol;
       currentLabel = label;
+      candlePrices = [];
       document.getElementById('coin-title').innerText = `Vela Actual ${label} (5M)`;
       document.getElementById('stats-title').innerText = `Rendimiento 5M (${label})`;
       document.getElementById('study-subtitle').innerText = `Análisis técnico avanzado para ${label}.`;
@@ -454,17 +494,31 @@
 
         candleCloseTime = kline.T;
         document.getElementById('coin-price').innerText = "$" + currentPrice.toLocaleString();
+        document.getElementById('val-open').innerText = "$" + openPrice.toLocaleString();
+        document.getElementById('val-high').innerText = "$" + highPrice.toLocaleString();
+        document.getElementById('val-low').innerText = "$" + lowPrice.toLocaleString();
 
-        // Actualizar estudio técnico Premium
+        // Si inició una nueva vela, reiniciamos el historial de la gráfica
+        if (currentCandleStart !== kline.t) {
+          currentCandleStart = kline.t;
+          candlePrices = [];
+        }
+
+        candlePrices.push(currentPrice);
+
+        // Actualizar Estudio Premium
         document.getElementById('study-res').innerText = "$" + highPrice.toLocaleString();
         document.getElementById('study-sup').innerText = "$" + lowPrice.toLocaleString();
         document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Impulso Alcista" : "Presión Bajista";
 
-        // Gráfica fluida
+        // Gráfica del Recorrido Completo de la Vela
         if (chart) {
-          chart.data.datasets[0].data.shift();
-          chart.data.datasets[0].data.push(currentPrice);
+          chart.data.labels = candlePrices.map((_, i) => i);
+          chart.data.datasets[0].data = candlePrices;
           chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#10b981' : '#f43f5e';
+          
+          // Línea horizontal del precio de apertura
+          chart.data.datasets[1].data = Array(candlePrices.length).fill(openPrice);
           chart.update();
         }
 
@@ -482,7 +536,7 @@
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
 
-        // Guardado tras cierre de vela
+        // Guardado al cerrar vela
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
@@ -501,7 +555,7 @@
             }
             
             const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Vela: $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
+            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Open: $${openPrice} | Close: $${currentPrice} | Pred: ${lastSignal.direction} | ${resultText}`);
             
             saveToStorage();
             updateStatsUI();
