@@ -73,7 +73,7 @@
       box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
     }
     
-    /* Tarjeta Estilo Binario / Trading */
+    /* Tarjetas */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -91,13 +91,13 @@
       font-weight: 700;
     }
     
-    /* Header de Cotización estilo Imagen */
+    /* Header de Cotización estilo Binario */
     .trading-header {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
     .trading-label {
       font-size: 11px;
@@ -105,8 +105,48 @@
       margin-bottom: 4px;
     }
     .trading-val {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
+    }
+
+    /* Botones de Predicción Visuales UP / DOWN */
+    .prediction-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .pred-btn {
+      background: rgba(255,255,255,0.02);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .pred-btn.up-active {
+      border-color: var(--green);
+      background: rgba(46, 160, 67, 0.1);
+      box-shadow: 0 0 12px rgba(46, 160, 67, 0.25);
+    }
+    .pred-btn.down-active {
+      border-color: var(--red);
+      background: rgba(248, 81, 73, 0.1);
+      box-shadow: 0 0 12px rgba(248, 81, 73, 0.25);
+    }
+    .pred-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .pred-prob {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 4px;
+      font-weight: 600;
     }
     
     .grid-2 {
@@ -133,12 +173,6 @@
     .yellow { color: var(--yellow); }
     .blue { color: var(--blue); }
     .purple { color: var(--purple); }
-    
-    .prediction-badge {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 4px 0;
-    }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -187,16 +221,6 @@
       border: 1px solid rgba(248, 81, 73, 0.3);
     }
 
-    .badge-premium {
-      background: linear-gradient(135deg, #bc8cff, #58a6ff);
-      color: white;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      margin-left: 4px;
-      font-weight: bold;
-    }
-
     .target-badge {
       background: #21262d;
       color: #8b949e;
@@ -204,6 +228,23 @@
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: bold;
+    }
+
+    /* Marcador Flotante sobre la Gráfica */
+    #chart-floating-price {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: rgba(240, 136, 62, 0.9);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      z-index: 10;
+      transition: background 0.3s ease;
     }
   </style>
 </head>
@@ -227,7 +268,7 @@
     <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP</button>
   </div>
 
-  <!-- SECCIÓN 1: INICIO Y GRÁFICO ESTILO TRADING -->
+  <!-- SECCIÓN 1: INICIO Y GRÁFICO -->
   <div id="tab-inicio" class="tab-content active">
     
     <!-- ENCABEZADO TIPO TARGET -->
@@ -248,26 +289,34 @@
       </div>
     </div>
 
-    <!-- GRÁFICO DE PASOS (STEPPED LINE) CON TARGET -->
-    <div class="card">
+    <!-- GRÁFICO DE PASOS CON MARCADOR FLOTANTE -->
+    <div class="card" style="position: relative;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span class="card-title" style="margin:0;">Trayectoria 5M</span>
         <span class="target-badge">Target (Apertura)</span>
       </div>
+      <div id="chart-floating-price">$--.----</div>
       <div style="height: 180px; position: relative;">
         <canvas id="liveChart"></canvas>
       </div>
     </div>
 
-    <!-- PRONÓSTICO EN VIVO -->
-    <div class="card">
-      <div class="card-title">Pronóstico AI Estimado</div>
-      <div id="pred-direction" class="prediction-badge blue">ANALIZANDO...</div>
-      <div style="font-size: 13px;">
-        Confianza estimada: <b id="pred-confidence">--%</b>
+    <!-- BOTONES DE PREDICCIÓN VISUALES UP / DOWN -->
+    <div class="prediction-buttons">
+      <div id="btn-up-card" class="pred-btn">
+        <div class="pred-title green">↗ Up</div>
+        <div id="prob-up-val" class="pred-prob">50.0%</div>
       </div>
-      <div style="font-size: 12px; color: var(--text-sub); margin-top: 6px;">
-        Recomendación: <b id="pred-recommendation" class="yellow">ESPERANDO CIERRE</b>
+      <div id="btn-down-card" class="pred-btn">
+        <div class="pred-title red">↘ Down</div>
+        <div id="prob-down-val" class="pred-prob">50.0%</div>
+      </div>
+    </div>
+
+    <!-- RECOMENDACIÓN DE ENTRADA -->
+    <div class="card" style="margin-top: 12px; text-align: center;">
+      <div style="font-size: 12px; color: var(--text-sub);">
+        Recomendación AI: <b id="pred-recommendation" class="yellow">ESPERANDO CIERRE</b>
       </div>
     </div>
   </div>
@@ -275,7 +324,7 @@
   <!-- SECCIÓN 2: ESTUDIO TÉCNICO (PREMIUM) -->
   <div id="tab-estudio" class="tab-content">
     <div class="card" style="border-color: var(--purple);">
-      <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span class="badge-premium">PREMIUM</span></div>
+      <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span style="background: linear-gradient(135deg, #bc8cff, #58a6ff); color: white; font-size: 9px; padding: 2px 6px; border-radius: 6px; margin-left: 4px;">PREMIUM</span></div>
       <div style="font-size: 12px; margin-bottom: 12px; color: var(--text-sub);" id="study-subtitle">
         Análisis de fuerza de mercado para BTC/USDT.
       </div>
@@ -372,7 +421,6 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
-    let initialOpenPrice = 0;
 
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
@@ -405,16 +453,15 @@
               data: [],
               borderColor: '#f0883e',
               borderWidth: 2,
-              stepped: true, // Estilo Escalón como en la foto de referencia
-              pointRadius: 0,
-              pointHoverRadius: 0
+              stepped: true,
+              pointRadius: 0
             },
             {
               label: 'Target (Inicial)',
               data: [],
               borderColor: 'rgba(139, 148, 158, 0.6)',
               borderWidth: 1.5,
-              borderDash: [5, 5], // Línea Punteada Target
+              borderDash: [5, 5],
               pointRadius: 0
             }
           ]
@@ -514,9 +561,7 @@
         const isCandleClosed = kline.x;
 
         candleCloseTime = kline.T;
-        initialOpenPrice = openPrice;
 
-        // Formato con decimales dinámicos según el precio
         const dec = currentPrice < 10 ? 4 : 2;
         const diffVal = currentPrice - openPrice;
         const diffSign = diffVal >= 0 ? "+$" : "-$";
@@ -529,7 +574,12 @@
         diffElem.innerText = `${diffSign}${Math.abs(diffVal).toFixed(2)}`;
         diffElem.className = diffVal >= 0 ? "green" : "red";
 
-        // Si inició una nueva vela de 5 minutos, limpiamos la gráfica
+        // Actualizar Marcador Flotante sobre la Gráfica
+        const floatTag = document.getElementById('chart-floating-price');
+        floatTag.innerText = "$" + currentPrice.toFixed(dec);
+        floatTag.style.background = diffVal >= 0 ? "rgba(46, 160, 67, 0.9)" : "rgba(240, 136, 62, 0.9)";
+
+        // Reiniciar datos si es nueva vela
         if (currentCandleStart !== kline.t) {
           currentCandleStart = kline.t;
           candlePrices = [];
@@ -543,40 +593,48 @@
         document.getElementById('study-sup').innerText = "$" + lowPrice.toFixed(dec);
         document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Escalón Alcista" : "Presión Bajista";
 
-        // Gráfica de Pasos (Stepped Target)
+        // Gráfica
         if (chart) {
           chart.data.labels = candlePrices.map(p => p.time);
           chart.data.datasets[0].data = candlePrices.map(p => p.price);
           chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#2ea043' : '#f0883e';
-          
-          // Línea Punteada Target (Precio Inicial)
           chart.data.datasets[1].data = Array(candlePrices.length).fill(openPrice);
           chart.update();
         }
 
-        // Predicción AI
+        // Cálculos para Botones UP / DOWN
         const diffPercent = ((currentPrice - openPrice) / openPrice) * 100;
-        const confidence = Math.min(95, Math.max(50, 50 + Math.abs(diffPercent) * 100)).toFixed(1);
-        let direction = diffPercent >= 0 ? "UP (SUBIR)" : "DOWN (BAJAR)";
-        let recommendation = confidence > 65 ? "ENTRAR" : "NO ENTRAR";
+        let upProb = Math.min(92, Math.max(8, 50 + diffPercent * 120)).toFixed(1);
+        let downProb = (100 - upProb).toFixed(1);
 
-        const predElem = document.getElementById('pred-direction');
-        predElem.innerText = direction;
-        predElem.className = "prediction-badge " + (diffPercent >= 0 ? "green" : "red");
+        document.getElementById('prob-up-val').innerText = `${upProb}%`;
+        document.getElementById('prob-down-val').innerText = `${downProb}%`;
 
-        document.getElementById('pred-confidence').innerText = confidence + "%";
+        const btnUp = document.getElementById('btn-up-card');
+        const btnDown = document.getElementById('btn-down-card');
+
+        if (diffPercent >= 0) {
+          btnUp.className = "pred-btn up-active";
+          btnDown.className = "pred-btn";
+        } else {
+          btnUp.className = "pred-btn";
+          btnDown.className = "pred-btn down-active";
+        }
+
+        let confidence = Math.max(upProb, downProb);
+        let recommendation = confidence > 65 ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
         document.getElementById('pred-recommendation').innerText = recommendation;
-        document.getElementById('pred-recommendation').className = recommendation === "ENTRAR" ? "green" : "yellow";
+        document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
 
-        // Guardar al cerrar la vela de 5M
+        // Guardado al cerrar vela de 5M
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
-            if (lastSignal.recommendation === "NO ENTRAR") {
+            if (lastSignal.recommendation.includes("NO ENTRAR")) {
               coinStats[currentSymbol].abstained++;
               resultText = "⚠️ Abstención";
             } else {
-              const realDirection = currentPrice >= openPrice ? "UP (SUBIR)" : "DOWN (BAJAR)";
+              const realDirection = currentPrice >= openPrice ? "UP" : "DOWN";
               if (lastSignal.direction === realDirection) {
                 coinStats[currentSymbol].hits++;
                 resultText = "✅ Acierto";
@@ -596,7 +654,7 @@
 
           lastSignal = {
             time: kline.t,
-            direction: direction,
+            direction: diffPercent >= 0 ? "UP" : "DOWN",
             confidence: confidence,
             recommendation: recommendation
           };
