@@ -91,7 +91,7 @@
       font-weight: 700;
     }
     
-    /* Header de Cotización estilo Binario */
+    /* Header de Cotización */
     .trading-header {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -243,7 +243,7 @@
       font-weight: bold;
     }
 
-    /* Marcador Flotante sobre la Gráfica */
+    /* Marcador Flotante */
     #chart-floating-price {
       position: absolute;
       right: 8px;
@@ -489,6 +489,7 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
+    let liveCurrentPrice = 0; // Guardamos el precio en tiempo real
     
     // Variables Simulador Demo
     let demoAmount = 10;
@@ -533,21 +534,26 @@
       demoAmount = amount;
     }
 
+    // Toma el PRECIO EXACTO AL MOMENTO DE ENTRAR
     function placeDemoTrade(type) {
       if (activeTrade) {
-        alert("Ya tienes una operación activa en la vela actual.");
+        alert("Ya tienes una operación activa en esta vela.");
         return;
       }
       if (demoData.balance < demoAmount) {
         alert("Saldo Demo insuficiente.");
         return;
       }
+      if (liveCurrentPrice <= 0) {
+        alert("Aún cargando el precio en vivo...");
+        return;
+      }
 
-      const currentPrice = parseFloat(document.getElementById('val-current').innerText.replace('$', '').replace(',', ''));
+      // Se fija la cotización de entrada actual en tiempo real
       activeTrade = {
         symbol: currentSymbol,
         type: type,
-        entryPrice: currentPrice,
+        entryPrice: liveCurrentPrice,
         amount: demoAmount
       };
 
@@ -555,11 +561,13 @@
       saveToStorage();
       updateDemoUI();
 
+      const dec = liveCurrentPrice < 10 ? 4 : 2;
       document.getElementById('active-trade-info').innerHTML = `
-        Operación: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | Entrada: <b>$${currentPrice.toFixed(2)}</b> | Monto: <b>$${demoAmount} USD</b>
+        Operación: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | Entrada Exacta: <b>$${liveCurrentPrice.toFixed(dec)}</b> | Monto: <b>$${demoAmount} USD</b>
       `;
     }
 
+    // Se evalúa contra el PRECIO DE CIERRE de la vela
     function resolveDemoTrade(closePrice) {
       if (!activeTrade) return;
 
@@ -567,14 +575,16 @@
                     (activeTrade.type === 'DOWN' && closePrice < activeTrade.entryPrice);
 
       demoData.totalTrades++;
+      const dec = closePrice < 10 ? 4 : 2;
+
       if (isWin) {
         demoData.wins++;
-        const profit = activeTrade.amount * 1.85; // Retorno del 85%
+        const profit = activeTrade.amount * 1.85; // Pago del 85%
         demoData.balance += profit;
-        alert(`🎉 ¡Operación Ganada! Ganancia: +$${(activeTrade.amount * 0.85).toFixed(2)} USDT`);
+        alert(`🎉 ¡Operación Ganada!\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nGanancia: +$${(activeTrade.amount * 0.85).toFixed(2)} USDT`);
       } else {
         demoData.losses++;
-        alert(`❌ Operación Perdida: -$${activeTrade.amount} USDT`);
+        alert(`❌ Operación Perdida\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nPérdida: -$${activeTrade.amount} USDT`);
       }
 
       activeTrade = null;
@@ -702,6 +712,7 @@
         const lowPrice = parseFloat(kline.l);
         const isCandleClosed = kline.x;
 
+        liveCurrentPrice = currentPrice;
         candleCloseTime = kline.T;
 
         const dec = currentPrice < 10 ? 4 : 2;
@@ -767,7 +778,18 @@
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
 
-        // Al cerrar la vela de 5 minutos, resolvemos la operación demo
+        // Actualizar información en tiempo real de la operación Demo si está activa
+        if (activeTrade) {
+          const tradeDiff = currentPrice - activeTrade.entryPrice;
+          const isWinning = (activeTrade.type === 'UP' && tradeDiff > 0) || (activeTrade.type === 'DOWN' && tradeDiff < 0);
+          document.getElementById('active-trade-info').innerHTML = `
+            Tipo: <b class="${activeTrade.type === 'UP' ? 'green' : 'red'}">${activeTrade.type}</b> | 
+            Entrada: <b>$${activeTrade.entryPrice.toFixed(dec)}</b> | 
+            Estado: <b class="${isWinning ? 'green' : 'red'}">${isWinning ? 'GANANDO' : 'PERDIENDO'} ($${tradeDiff >= 0 ? '+' : ''}${tradeDiff.toFixed(2)})</b>
+          `;
+        }
+
+        // Al cerrar la vela de 5 minutos, liquidamos la operación demo usando el precio de entrada
         if (isCandleClosed) {
           resolveDemoTrade(currentPrice);
 
