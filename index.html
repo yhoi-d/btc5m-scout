@@ -1,840 +1,1294 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>BTC 5M AI Lab Pro - Pool Dinámico</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --card-border: #21262d;
-      --text-main: #ffffff;
-      --text-sub: #8b949e;
-      --green: #2ea043;
-      --red: #f85149;
-      --orange: #f0883e;
-      --yellow: #d29922;
-      --blue: #58a6ff;
-      --purple: #bc8cff;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 14px 14px 85px 14px;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .status-badge {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: rgba(46, 160, 67, 0.15);
-      color: var(--green);
-      font-weight: bold;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="BTC 5M Scout: análisis experimental y simulador educativo.">
+<title>BTC 5M AI · Beta 0.2</title>
 
-    /* Selector de Monedas */
-    .coin-selector {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-    }
-    .coin-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-sub);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      white-space: nowrap;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .coin-btn.active {
-      background: var(--blue);
-      color: white;
-      border-color: var(--blue);
-      box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
-    }
-    
-    /* Tarjetas */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    }
-    .card-title {
-      font-size: 11px;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-    
-    /* Header de Cotización */
-    .trading-header {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      text-align: center;
-      margin-bottom: 4px;
-    }
-    .trading-label {
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-bottom: 4px;
-    }
-    .trading-val {
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    /* Botones UP / DOWN Visuales con Multiplicador */
-    .prediction-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .pred-btn {
-      background: rgba(255,255,255,0.02);
-      border: 2px solid var(--card-border);
-      border-radius: 12px;
-      padding: 12px 10px;
-      text-align: center;
-      transition: all 0.2s ease;
-    }
-    .pred-btn.up-active {
-      border-color: var(--green);
-      background: rgba(46, 160, 67, 0.1);
-      box-shadow: 0 0 12px rgba(46, 160, 67, 0.25);
-    }
-    .pred-btn.down-active {
-      border-color: var(--red);
-      background: rgba(248, 81, 73, 0.1);
-      box-shadow: 0 0 12px rgba(248, 81, 73, 0.25);
-    }
-    .pred-title {
-      font-size: 16px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .pred-multiplier {
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.08);
-      margin-top: 4px;
-      display: inline-block;
-      font-weight: bold;
-    }
-    
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-    }
-    .stat-box {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--card-border);
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    .stat-val {
-      font-size: 17px;
-      font-weight: 800;
-      margin-top: 4px;
-    }
-    
-    .green { color: var(--green); }
-    .red { color: var(--red); }
-    .orange { color: var(--orange); }
-    .yellow { color: var(--yellow); }
-    .blue { color: var(--blue); }
-    .purple { color: var(--purple); }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* Navbar Inferior */
-    .navbar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: #0d1117;
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 1000;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: var(--text-sub);
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 20%;
-    }
-    .nav-item.active {
-      color: var(--blue);
-    }
-    
-    button {
-      width: 100%;
-      padding: 12px;
-      background: var(--blue);
-      border: none;
-      color: white;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-green { background: #2ea043; color: white; }
-    .btn-red { background: #da3633; color: white; }
-    .btn-danger { background: rgba(248, 81, 73, 0.15); color: var(--red); border: 1px solid rgba(248, 81, 73, 0.3); }
-
-    .target-badge {
-      background: #21262d;
-      color: #8b949e;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-
-    #chart-floating-price {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      background: rgba(240, 136, 62, 0.9);
-      color: #ffffff;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      pointer-events: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      z-index: 10;
-    }
-
-    .amount-btn {
-      background: var(--bg-color);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .amount-btn.selected {
-      border-color: var(--blue);
-      background: rgba(88, 166, 255, 0.15);
-      color: var(--blue);
-    }
-  </style>
+<style>
+:root{
+--bg:#080d19;--panel:#111a2b;--line:#273650;
+--text:#eef4ff;--muted:#91a2bd;--green:#36d399;
+--red:#fb7185;--yellow:#fbbf24;--blue:#7c9cff
+}
+*{box-sizing:border-box}
+body{
+margin:0;background:radial-gradient(ellipse at top,#172441,#080d19 60%);
+color:var(--text);font:15px/1.45 system-ui,sans-serif;padding-bottom:80px
+}
+header,main{max-width:900px;margin:auto}
+header{padding:18px 15px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;font-size:22px}
+.brand span{color:var(--blue)}
+.tag{font-size:11px;color:var(--yellow);border:1px solid #6c5723;padding:4px 8px;border-radius:20px}
+main{padding:0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:10px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.label,.muted{color:var(--muted)}
+.label{font-size:12px}
+.small{font-size:12px}
+.price{font-size:clamp(27px,7vw,40px);font-weight:900;margin:5px 0}
+button,input,select{font:inherit;color:var(--text);background:#1a2942;border:1px solid #344866;border-radius:10px;padding:10px}
+button{cursor:pointer;font-weight:700}
+button.primary{background:var(--blue);color:#081021}
+button.danger{background:#411e2a}
+.coin-list{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+.coin{padding:9px 2px;font-size:12px}
+.coin.active{background:var(--blue);color:#081021}
+.signal{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.signal-direction{font-size:25px;font-weight:900}
+.up,.success{color:var(--green)}
+.down,.error{color:var(--red)}
+.neutral{color:var(--yellow)}
+.badge{display:inline-block;padding:5px 8px;border-radius:20px;background:#263653;font-size:11px}
+.green{background:#123d35;color:#6af0c1}
+.yellow{background:#49391a;color:#ffe09a}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stat{background:#0b1425;border:1px solid #253650;border-radius:11px;padding:11px;min-width:0}
+.stat strong{display:block;font-size:20px;margin-top:3px;overflow-wrap:anywhere}
+.section-title{font-size:16px;font-weight:800;margin-bottom:10px}
+.meter{height:8px;background:#263650;border-radius:20px;overflow:hidden;margin:8px 0}
+.meter div{height:100%;width:0;background:var(--blue)}
+.tabs{position:fixed;z-index:10;bottom:0;left:0;right:0;background:#0b1221f5;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:7px 5px max(7px,env(safe-area-inset-bottom));max-width:900px;margin:auto}
+.tabs button{background:transparent;border:0;color:var(--muted);font-size:11px;padding:7px 2px}
+.tabs button.active{color:white;background:#1c2a45}
+.tabs span{display:block;font-size:17px}
+.page{display:none}
+.page.active{display:block}
+canvas{width:100%;height:190px;display:block;background:#0a1323;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{text-align:left;padding:8px 5px;border-bottom:1px solid #263650}
+th{color:var(--muted)}
+.scroll{overflow-x:auto}
+.notice{border:1px solid #6a5421;background:#302712;color:#ffe4a0;padding:11px;border-radius:11px;font-size:12px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;min-width:0}
+@media(min-width:650px){
+.grid2{grid-template-columns:repeat(4,minmax(0,1fr))}
+.market-layout{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+}
+</style>
 </head>
+
 <body>
+<header>
+<div>
+<div class="brand">BTC <span>5M AI</span></div>
+<div class="small muted">Scout · Beta 0.2 · Simulación</div>
+</div>
+<span class="tag">EXPERIMENTAL</span>
+</header>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div>
-      <h2 style="margin:0; font-size: 17px; font-weight: 800;" id="app-header-title">BTC Up or Down 5m</h2>
-      <span style="font-size: 11px; color: var(--text-sub);">Predicción Binance Pool Dinámico</span>
-    </div>
-    <div id="conn-status" class="status-badge">Conectando...</div>
-  </div>
+<main>
 
-  <!-- SELECTOR DE CRIPTOMONEDAS -->
-  <div class="coin-selector">
-    <button class="coin-btn active" onclick="selectCoin('btcusdt', 'BTC/USDT', this)">₿ BTC</button>
-    <button class="coin-btn" onclick="selectCoin('ethusdt', 'ETH/USDT', this)">Ξ ETH</button>
-    <button class="coin-btn" onclick="selectCoin('solusdt', 'SOL/USDT', this)">◎ SOL</button>
-    <button class="coin-btn" onclick="selectCoin('bnbusdt', 'BNB/USDT', this)">🔶 BNB</button>
-    <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP</button>
-  </div>
+<!-- MERCADO -->
+<section id="page-market" class="page active">
+<div class="card">
+<div class="row">
+<div>
+<div class="label">MERCADO SELECCIONADO</div>
+<h2 id="coinTitle" style="margin:3px 0">Bitcoin · BTC/USDT</h2>
+</div>
+<div class="small"><span id="connectionDot">🟡</span> <span id="connectionText">Conectando...</span></div>
+</div>
 
-  <!-- SECCIÓN 1: INICIO -->
-  <div id="tab-inicio" class="tab-content active">
-    <div class="card">
-      <div class="trading-header">
-        <div>
-          <div class="trading-label">Precio inicial</div>
-          <div id="val-open" class="trading-val" style="color:#c9d1d9;">$--.----</div>
-        </div>
-        <div>
-          <div class="trading-label">Precio actual <span id="val-diff" class="green" style="font-size:10px;">+$0.00</span></div>
-          <div id="val-current" class="trading-val orange">$--.----</div>
-        </div>
-        <div>
-          <div class="trading-label">Cuenta regresiva</div>
-          <div id="timer" class="trading-val red">00:00</div>
-        </div>
-      </div>
-    </div>
+<div class="coin-list">
+<button class="coin active" data-symbol="BTCUSDT">₿ BTC</button>
+<button class="coin" data-symbol="ETHUSDT">◆ ETH</button>
+<button class="coin" data-symbol="SOLUSDT">◎ SOL</button>
+<button class="coin" data-symbol="BNBUSDT">◆ BNB</button>
+<button class="coin" data-symbol="XRPUSDT">✕ XRP</button>
+</div>
 
-    <div class="card" style="position: relative;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span class="card-title" style="margin:0;">Trayectoria 5M</span>
-        <span class="target-badge">Target (Apertura)</span>
-      </div>
-      <div id="chart-floating-price">$--.----</div>
-      <div style="height: 180px; position: relative;">
-        <canvas id="liveChart"></canvas>
-      </div>
-    </div>
+<div style="margin-top:16px">
+<div class="label">PRECIO EN VIVO</div>
+<div id="price" class="price">—</div>
+<div class="row">
+<span id="priceChange" class="small muted">Esperando mercado...</span>
+<span id="countdown" class="badge">Próxima vela: --:--</span>
+</div>
+</div>
+</div>
 
-    <!-- BOTONES UP / DOWN CON MULTIPLICADOR DINÁMICO -->
-    <div class="prediction-buttons">
-      <div id="btn-up-card" class="pred-btn">
-        <div class="pred-title green">↗ Up</div>
-        <div id="mult-up-val" class="pred-multiplier green">Pago: 1.85x</div>
-      </div>
-      <div id="btn-down-card" class="pred-btn">
-        <div class="pred-title red">↘ Down</div>
-        <div id="mult-down-val" class="pred-multiplier red">Pago: 1.85x</div>
-      </div>
-    </div>
+<div class="market-layout">
+<div class="card">
+<div class="section-title">Gráfico · velas de 5 minutos</div>
+<canvas id="chart" width="700" height="260"></canvas>
+<p class="small muted">Gráfico de cierres recientes.</p>
+</div>
 
-    <div class="card" style="margin-top: 12px; text-align: center;">
-      <div style="font-size: 12px; color: var(--text-sub);">
-        Recomendación AI: <b id="pred-recommendation" class="yellow">ESPERANDO CIERRE</b>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<div class="section-title">Predicción para la próxima vela</div>
+<div class="signal">
+<div>
+<div class="label">DIRECCIÓN ESTIMADA</div>
+<div id="direction" class="signal-direction neutral">ESPERANDO</div>
+</div>
+<span id="signalBadge" class="badge yellow">Sin señal</span>
+</div>
 
-  <!-- SECCIÓN 2: SIMULADOR DE TRADING DEMO -->
-  <div id="tab-simulador" class="tab-content">
-    <div class="card">
-      <div class="card-title">Balance de Cuenta Demo</div>
-      <div class="grid-3" style="margin-top: 8px;">
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Saldo Demo</div>
-          <div id="demo-balance" class="stat-val green">$1,000.00</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Operaciones</div>
-          <div id="demo-trades-count" class="stat-val blue">0</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Winrate</div>
-          <div id="demo-winrate" class="stat-val yellow">0.0%</div>
-        </div>
-      </div>
-    </div>
+<div class="row" style="margin-top:12px">
+<span class="label">Puntuación de reglas</span>
+<strong id="score">—</strong>
+</div>
+<div class="meter"><div id="scoreMeter"></div></div>
 
-    <div class="card">
-      <div class="card-title">Entrar al Pool en Vivo</div>
-      <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">
-        Monto a apostar (USDT Virtual):
-      </div>
-      <div class="grid-4" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
-        <button class="amount-btn selected" onclick="setTradeAmount(10, this)">$10</button>
-        <button class="amount-btn" onclick="setTradeAmount(25, this)">$25</button>
-        <button class="amount-btn" onclick="setTradeAmount(50, this)">$50</button>
-        <button class="amount-btn" onclick="setTradeAmount(100, this)">$100</button>
-      </div>
+<div class="row">
+<span class="label">Recomendación</span>
+<strong id="recommendation">Esperando datos</strong>
+</div>
+<p id="signalReason" class="small muted">Cargando histórico de velas...</p>
 
-      <div class="grid-2">
-        <button class="btn-green" onclick="placeDemoTrade('UP')">Apostar UP ↗</button>
-        <button class="btn-red" onclick="placeDemoTrade('DOWN')">Apostar DOWN ↘</button>
-      </div>
-    </div>
+<div class="row">
+<span id="rsiBadge" class="badge">RSI: —</span>
+<span id="emaBadge" class="badge">EMA: —</span>
+<span id="volBadge" class="badge">Volatilidad: —</span>
+</div>
+</div>
 
-    <div class="card">
-      <div class="card-title">Posición en Curso</div>
-      <div id="active-trade-info" style="font-size: 12px; color: var(--text-sub); text-align: center; padding: 6px 0;">
-        Sin posiciones abiertas en esta vela.
-      </div>
-    </div>
-  </div>
+<div class="card">
+<div class="section-title">Estadísticas de señales</div>
+<div class="grid2">
+<div class="stat"><span class="label">Aciertos</span><strong id="wins" class="success">0</strong></div>
+<div class="stat"><span class="label">Fallos</span><strong id="losses" class="error">0</strong></div>
+<div class="stat"><span class="label">Abstenciones</span><strong id="abstains">0</strong></div>
+<div class="stat"><span class="label">Precisión</span><strong id="accuracy">—</strong></div>
+</div>
+<p class="small muted">La precisión solo incluye señales direccionales resueltas. Las abstenciones se contabilizan por separado.</p>
+</div>
 
-  <!-- SECCIÓN 3: ESTUDIO TÉCNICO (PREMIUM) -->
-  <div id="tab-estudio" class="tab-content">
-    <div class="card" style="border-color: var(--purple);">
-      <div class="card-title" style="color: var(--purple);">Estudio Técnico AI <span style="background: linear-gradient(135deg, #bc8cff, #58a6ff); color: white; font-size: 9px; padding: 2px 6px; border-radius: 6px; margin-left: 4px;">PREMIUM</span></div>
-      <div style="font-size: 12px; margin-bottom: 12px; color: var(--text-sub);" id="study-subtitle">
-        Análisis de fuerza de mercado para BTC/USDT.
-      </div>
-      
-      <div class="grid-2" style="margin-bottom: 12px;">
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Tendencia Actual</div>
-          <div id="study-pattern" class="stat-val purple" style="font-size:13px;">Consolidación</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:10px; color:var(--text-sub);">Sentimiento Vol.</div>
-          <div id="study-volume" class="stat-val green" style="font-size:13px;">Alcista</div>
-        </div>
-      </div>
+<div class="card">
+<div class="section-title">Histórico del mercado</div>
+<div class="row">
+<span id="historyStatus" class="small muted">Cargando...</span>
+<button id="refreshHistory">Actualizar</button>
+</div>
+<p class="small muted">Se intentan descargar hasta 500 velas cerradas. Si falla la API, se utilizan los datos que lleguen en vivo.</p>
+</div>
+</div>
+</section>
 
-      <div class="stat-box" style="text-align: left; margin-bottom: 12px;">
-        <div style="font-size:11px; color:var(--text-sub);">Niveles Extremos de la Vela:</div>
-        <div style="font-size: 12px; margin-top: 4px;">
-          • Máximo Alcanzado: <b id="study-res" class="green">$--.----</b><br>
-          • Mínimo Alcanzado: <b id="study-sup" class="red">$--.----</b>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- SIMULADOR -->
+<section id="page-simulator" class="page">
+<div class="card">
+<div class="section-title">Simulador de operaciones</div>
+<div class="notice">MODO DEMO: no se ejecutan operaciones reales ni se mueve dinero. Los resultados son simulados y no garantizan ganancias futuras.</div>
 
-  <!-- SECCIÓN 4: ESTADÍSTICAS & HISTORIAL -->
-  <div id="tab-estadisticas" class="tab-content">
-    <div class="card">
-      <div class="card-title" id="stats-title">Rendimiento Histórico 5M (BTC/USDT)</div>
-      <div class="grid-2">
-        <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Aciertos</div>
-          <div id="stat-hits" class="stat-val green">0</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Fallos</div>
-          <div id="stat-misses" class="stat-val red">0</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Abstenciones</div>
-          <div id="stat-abstained" class="stat-val yellow">0</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:var(--text-sub);">Precisión</div>
-          <div id="stat-accuracy" class="stat-val blue">0.0%</div>
-        </div>
-      </div>
-      <button class="btn-danger" style="margin-top: 14px;" onclick="resetCurrentCoinStats()">
-        Reiniciar Métricas de Moneda
-      </button>
-    </div>
+<div class="grid2" style="margin-top:12px">
+<div class="stat"><span class="label">Saldo virtual</span><strong id="balance">$10,000.00</strong></div>
+<div class="stat"><span class="label">Ganancia/pérdida</span><strong id="pnl">$0.00</strong></div>
+<div class="stat"><span class="label">Cerradas</span><strong id="closedTrades">0</strong></div>
+<div class="stat"><span class="label">Abiertas</span><strong id="openTrades">0</strong></div>
+</div>
 
-    <div class="card">
-      <div class="card-title">Historial de Señales (Moneda Actual)</div>
-      <div id="history-list" style="font-size: 12px; color: var(--text-sub);">
-        Sin historial grabado aún para esta moneda.
-      </div>
-    </div>
-  </div>
+<div class="formgrid" style="margin-top:14px">
+<div class="field">
+<label for="stake">Monto virtual ($)</label>
+<input id="stake" type="number" min="1" step="1" value="100">
+</div>
+<div class="field">
+<label for="tradeDirection">Dirección</label>
+<select id="tradeDirection">
+<option value="AUTO">Usar señal actual</option>
+<option value="UP">ARRIBA</option>
+<option value="DOWN">ABAJO</option>
+</select>
+</div>
+</div>
 
-  <!-- NAVBAR INFERIOR -->
-  <div class="navbar">
-    <div class="nav-item active" onclick="switchTab('inicio', this)">
-      <span style="font-size:16px;">📊</span>
-      <span>Inicio</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('simulador', this)">
-      <span style="font-size:16px;">🎮</span>
-      <span>Demo</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('estudio', this)">
-      <span style="font-size:16px;">🧠</span>
-      <span>Estudio</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('estadisticas', this)">
-      <span style="font-size:16px;">📈</span>
-      <span>Métricas</span>
-    </div>
-  </div>
+<div class="row" style="margin-top:12px">
+<button id="openTrade" class="primary">Abrir operación demo</button>
+<button id="resetDemo" class="danger">Reiniciar demo</button>
+</div>
+<p id="simMessage" class="small muted">Las operaciones quedan vinculadas a su moneda y vela objetivo.</p>
+</div>
 
-  <script>
-    let currentSymbol = 'btcusdt';
-    let currentLabel = 'BTC/USDT';
-    let ws = null;
-    let chart = null;
-    let lastSignal = null;
-    let candleCloseTime = 0;
-    let currentCandleStart = 0;
-    let candlePrices = [];
-    let liveCurrentPrice = 0;
-    
-    // Multiplicadores dinámicos del Pool
-    let currentUpMultiplier = 1.85;
-    let currentDownMultiplier = 1.85;
+<div class="card">
+<div class="section-title">Operaciones abiertas</div>
+<div id="openTradeList" class="small muted">No hay operaciones abiertas.</div>
+</div>
 
-    // Variables Simulador Demo
-    let demoAmount = 10;
-    let activeTrade = null;
-    let demoData = JSON.parse(localStorage.getItem('btc5m_demo_account')) || {
-      balance: 1000,
-      wins: 0,
-      losses: 0,
-      totalTrades: 0
-    };
+<div class="card">
+<div class="section-title">Operaciones cerradas</div>
+<div class="scroll">
+<table>
+<thead><tr><th>Fecha</th><th>Moneda</th><th>Dirección</th><th>Resultado</th><th>P/L</th></tr></thead>
+<tbody id="tradeTable"></tbody>
+</table>
+</div>
+</div>
+</section>
 
-    let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
-      btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
-      ethusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
-      solusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
-      bnbusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
-      xrpusdt: { hits: 0, misses: 0, abstained: 0, history: [] }
-    };
+<!-- ANALISIS -->
+<section id="page-analysis" class="page">
+<div class="card">
+<div class="section-title">Análisis técnico</div>
+<p class="small muted">Las señales se calculan mediante reglas técnicas. La puntuación no es una probabilidad estadística validada.</p>
 
-    function saveToStorage() {
-      localStorage.setItem('btc5m_persistent_stats', JSON.stringify(coinStats));
-      localStorage.setItem('btc5m_demo_account', JSON.stringify(demoData));
+<div class="grid2">
+<div class="stat"><span class="label">RSI (14)</span><strong id="rsiValue">—</strong><span id="rsiText" class="small muted">Esperando</span></div>
+<div class="stat"><span class="label">EMA 9 / EMA 21</span><strong id="emaValue">—</strong><span id="emaText" class="small muted">Esperando</span></div>
+<div class="stat"><span class="label">Momentum</span><strong id="momentumValue">—</strong><span id="momentumText" class="small muted">Esperando</span></div>
+<div class="stat"><span class="label">Volatilidad</span><strong id="volatilityValue">—</strong><span id="volatilityText" class="small muted">Esperando</span></div>
+</div>
+
+<div class="section-title" style="margin-top:18px">Funcionamiento</div>
+<ol class="small muted">
+<li>Analiza las velas de 5 minutos que ya cerraron.</li>
+<li>Calcula EMA 9, EMA 21, RSI y momentum.</li>
+<li>Si las reglas no coinciden suficientemente, se abstiene.</li>
+<li>Cuando cierra la vela objetivo, compara la predicción guardada con el resultado real.</li>
+</ol>
+
+<div class="notice">Esta beta no contiene un modelo de aprendizaje automático entrenado. Registra los resultados para que puedas evaluar su rendimiento, pero no aprende automáticamente a mejorar.</div>
+</div>
+
+<div class="card">
+<div class="section-title">Estadísticas por moneda</div>
+<div class="scroll">
+<table>
+<thead><tr><th>Moneda</th><th>Aciertos</th><th>Fallos</th><th>Abstenciones</th><th>Precisión</th></tr></thead>
+<tbody id="allStats"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- HISTORIAL -->
+<section id="page-history" class="page">
+<div class="card">
+<div class="section-title">Historial de señales</div>
+<div class="row">
+<span id="signalCount" class="small muted">0 registros</span>
+<button id="exportCsv">Exportar CSV</button>
+</div>
+
+<div class="scroll" style="margin-top:10px">
+<table>
+<thead><tr><th>Fecha</th><th>Moneda</th><th>Predicción</th><th>Puntos</th><th>Resultado</th></tr></thead>
+<tbody id="signalTable"></tbody>
+</table>
+</div>
+
+<p class="small muted">Los registros se guardan localmente en este navegador. Si borras los datos del sitio, podrías perderlos.</p>
+<button id="clearHistory" class="danger">Borrar historial</button>
+</div>
+</section>
+
+</main>
+
+<nav class="tabs">
+<button class="active" data-page="market"><span>⌂</span>Mercado</button>
+<button data-page="simulator"><span>⇄</span>Simulador</button>
+<button data-page="analysis"><span>◫</span>Análisis</button>
+<button data-page="history"><span>☷</span>Historial</button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+
+const $=id=>document.getElementById(id);
+
+const SYMBOLS={
+ BTCUSDT:'Bitcoin',
+ ETHUSDT:'Ethereum',
+ SOLUSDT:'Solana',
+ BNBUSDT:'BNB',
+ XRPUSDT:'XRP'
+};
+
+const STORAGE_KEY='btc5m_scout_beta02';
+const MIN_SIGNAL_SCORE=3;
+
+let currentSymbol='BTCUSDT';
+let ws=null;
+let reconnectTimer=null;
+let reconnectDelay=1500;
+let socketGeneration=0;
+
+let candles={};
+let currentCandle={};
+let lastPrice={};
+let lastClosedTime={};
+let predictions={};
+
+function blankStats(){
+ return {wins:0,losses:0,abstains:0,correct:0,totalDirectional:0};
+}
+
+function defaultState(){
+ const stats={};
+ Object.keys(SYMBOLS).forEach(s=>stats[s]=blankStats());
+ return {
+  version:2,
+  stats,
+  signals:[],
+  trades:[],
+  balance:10000,
+  initialBalance:10000,
+  realizedPnl:0
+ };
+}
+
+function loadState(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return defaultState();
+
+  const p=JSON.parse(raw);
+  const base=defaultState();
+
+  Object.keys(SYMBOLS).forEach(s=>{
+   base.stats[s]={
+    ...blankStats(),
+    ...(p.stats&&p.stats[s]||{})
+   };
+  });
+
+  base.signals=Array.isArray(p.signals)?p.signals.slice(-1500):[];
+  base.trades=Array.isArray(p.trades)?p.trades.slice(-500):[];
+  base.balance=Number.isFinite(+p.balance)?+p.balance:10000;
+  base.initialBalance=Number.isFinite(+p.initialBalance)?+p.initialBalance:10000;
+  base.realizedPnl=Number.isFinite(+p.realizedPnl)?+p.realizedPnl:base.balance-base.initialBalance;
+
+  return base;
+ }catch(e){
+  return defaultState();
+ }
+}
+
+let state=loadState();
+
+function saveState(){
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+ }catch(e){
+  console.warn('No se pudo guardar el estado',e);
+ }
+}
+
+function fmtPrice(n){
+ if(!Number.isFinite(n))return '—';
+ return n.toLocaleString('en-US',{
+  minimumFractionDigits:2,
+  maximumFractionDigits:n<1?6:2
+ });
+}
+
+function fmtMoney(n){
+ return (n<0?'−':'')+'$'+Math.abs(n).toLocaleString('en-US',{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
+
+function fmtDate(t){
+ return t?new Date(t).toLocaleString():'—';
+}
+
+function fmtTime(t){
+ return t?new Date(t).toLocaleTimeString([],{
+  hour:'2-digit',
+  minute:'2-digit',
+  second:'2-digit'
+ }):'—';
+}
+
+function pct(n){
+ return Number.isFinite(n)?n.toFixed(2)+'%':'—';
+}
+
+function targetKey(symbol,time){
+ return symbol+'_'+time;
+}
+
+function getCandles(symbol){
+ if(!candles[symbol])candles[symbol]=[];
+ return candles[symbol];
+}
+
+function upsertCandle(symbol,c){
+ const arr=getCandles(symbol);
+ const i=arr.findIndex(x=>x.t===c.t);
+
+ if(i>=0)arr[i]=c;
+ else arr.push(c);
+
+ arr.sort((a,b)=>a.t-b.t);
+
+ if(arr.length>600)arr.splice(0,arr.length-600);
+}
+
+function setConnection(ok,text){
+ $('connectionDot').textContent=ok?'🟢':'🟡';
+ $('connectionText').textContent=text;
+}
+
+function connect(){
+ if(ws){
+  try{
+   ws.onopen=null;
+   ws.onclose=null;
+   ws.onerror=null;
+   ws.onmessage=null;
+   ws.close();
+  }catch(e){}
+ }
+
+ if(reconnectTimer){
+  clearTimeout(reconnectTimer);
+  reconnectTimer=null;
+ }
+
+ const gen=++socketGeneration;
+ setConnection(false,'Conectando...');
+
+ const stream=currentSymbol.toLowerCase()+'@kline_5m';
+
+ try{
+  ws=new WebSocket('wss://stream.binance.com:9443/ws/'+stream);
+ }catch(e){
+  scheduleReconnect(gen);
+  return;
+ }
+
+ ws.onopen=()=>{
+  if(gen!==socketGeneration)return;
+  reconnectDelay=1500;
+  setConnection(true,'En vivo');
+ };
+
+ ws.onerror=()=>{
+  if(gen===socketGeneration)setConnection(false,'Error de conexión');
+ };
+
+ ws.onclose=()=>{
+  if(gen===socketGeneration){
+   setConnection(false,'Reconectando...');
+   scheduleReconnect(gen);
+  }
+ };
+
+ ws.onmessage=ev=>{
+  if(gen!==socketGeneration)return;
+
+  try{
+   const msg=JSON.parse(ev.data);
+   const k=msg.k;
+   if(!k)return;
+
+   const c={
+    t:+k.t,
+    o:+k.o,
+    h:+k.h,
+    l:+k.l,
+    c:+k.c,
+    v:+k.v,
+    closed:!!k.x
+   };
+
+   if(![c.t,c.o,c.h,c.l,c.c].every(Number.isFinite))return;
+
+   lastPrice[currentSymbol]=c.c;
+   currentCandle[currentSymbol]=c;
+
+   if(c.closed){
+    upsertCandle(currentSymbol,c);
+
+    if(lastClosedTime[currentSymbol]!==c.t){
+     lastClosedTime[currentSymbol]=c.t;
+     resolvePrediction(currentSymbol,c);
+     resolveTrades(currentSymbol,c);
     }
 
-    function switchTab(tabId, element) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      document.getElementById('tab-' + tabId).classList.add('active');
-      element.classList.add('active');
-    }
+    createPrediction(currentSymbol,c.t+300000);
+   }
 
-    function updateDemoUI() {
-      document.getElementById('demo-balance').innerText = `$${demoData.balance.toFixed(2)}`;
-      document.getElementById('demo-trades-count').innerText = demoData.totalTrades;
-      const winrate = demoData.totalTrades > 0 ? ((demoData.wins / demoData.totalTrades) * 100).toFixed(1) : "0.0";
-      document.getElementById('demo-winrate').innerText = `${winrate}%`;
-    }
+   renderMarket();
 
-    function setTradeAmount(amount, element) {
-      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
-      element.classList.add('selected');
-      demoAmount = amount;
-    }
+  }catch(e){
+   console.warn('Mensaje inválido',e);
+  }
+ };
+}
 
-    // REGISTRO DE ENTRADA CON EL MULTIPLICADOR Y PRECIO EN ESE SEGUNDO
-    function placeDemoTrade(type) {
-      if (activeTrade) {
-        alert("Ya tienes una posición abierta en esta vela.");
-        return;
-      }
-      if (demoData.balance < demoAmount) {
-        alert("Saldo Demo insuficiente.");
-        return;
-      }
+function scheduleReconnect(gen){
+ if(gen!==socketGeneration||reconnectTimer)return;
 
-      const lockedMultiplier = type === 'UP' ? currentUpMultiplier : currentDownMultiplier;
+ reconnectTimer=setTimeout(()=>{
+  reconnectTimer=null;
+  if(gen===socketGeneration)connect();
+ },reconnectDelay);
 
-      activeTrade = {
-        symbol: currentSymbol,
-        type: type,
-        entryPrice: liveCurrentPrice,
-        amount: demoAmount,
-        multiplier: lockedMultiplier
-      };
+ reconnectDelay=Math.min(reconnectDelay*1.7,20000);
+}
 
-      demoData.balance -= demoAmount;
-      saveToStorage();
-      updateDemoUI();
+function nextFiveMinuteOpen(){
+ return Math.floor(Date.now()/300000)*300000+300000;
+}
 
-      const dec = liveCurrentPrice < 10 ? 4 : 2;
-      document.getElementById('active-trade-info').innerHTML = `
-        Tipo: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | 
-        Entrada: <b>$${liveCurrentPrice.toFixed(dec)}</b> | 
-        Cuota Fijada: <b>${lockedMultiplier}x</b>
-      `;
-    }
+async function loadHistory(symbol=currentSymbol){
+ $('historyStatus').textContent='Cargando histórico...';
 
-    // RESOLUCIÓN SEGÚN MULTIPLICADOR CONSEGUIDO AL ENTRAR
-    function resolveDemoTrade(closePrice) {
-      if (!activeTrade) return;
+ try{
+  const url='https://data-api.binance.vision/api/v3/klines?symbol='+
+   symbol+'&interval=5m&limit=500';
 
-      const isWin = (activeTrade.type === 'UP' && closePrice > activeTrade.entryPrice) ||
-                    (activeTrade.type === 'DOWN' && closePrice < activeTrade.entryPrice);
+  const response=await fetch(url,{cache:'no-store'});
 
-      demoData.totalTrades++;
-      const dec = closePrice < 10 ? 4 : 2;
+  if(!response.ok)throw new Error('HTTP '+response.status);
 
-      if (isWin) {
-        demoData.wins++;
-        const totalPayout = activeTrade.amount * activeTrade.multiplier;
-        const profit = totalPayout - activeTrade.amount;
-        demoData.balance += totalPayout;
+  const rows=await response.json();
 
-        alert(`🎉 ¡Operación Ganada!\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nCuota: ${activeTrade.multiplier}x | Ganancia: +$${profit.toFixed(2)} USDT`);
-      } else {
-        demoData.losses++;
-        alert(`❌ Operación Perdida\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nPérdida: -$${activeTrade.amount} USDT`);
-      }
+  if(!Array.isArray(rows))throw new Error('Respuesta inválida');
 
-      activeTrade = null;
-      document.getElementById('active-trade-info').innerText = "Sin posiciones abiertas en esta vela.";
-      saveToStorage();
-      updateDemoUI();
-    }
+  rows.forEach(r=>{
+   const c={
+    t:+r[0],
+    o:+r[1],
+    h:+r[2],
+    l:+r[3],
+    c:+r[4],
+    v:+r[5],
+    closed:(+r[0]+300000<=Date.now())
+   };
 
-    // Temporizador fluído
-    setInterval(() => {
-      if (candleCloseTime > 0) {
-        const now = new Date().getTime();
-        const restSec = Math.max(0, Math.floor((candleCloseTime - now) / 1000));
-        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
-        const s = (restSec % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
-      }
-    }, 1000);
+   if(c.closed)upsertCandle(symbol,c);
+  });
 
-    function initChart() {
-      const ctx = document.getElementById('liveChart').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: 'Precio Actual',
-              data: [],
-              borderColor: '#f0883e',
-              borderWidth: 2,
-              stepped: true,
-              pointRadius: 0
-            },
-            {
-              label: 'Target (Inicial)',
-              data: [],
-              borderColor: 'rgba(139, 148, 158, 0.6)',
-              borderWidth: 1.5,
-              borderDash: [5, 5],
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          animation: false,
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { 
-              grid: { color: 'rgba(255,255,255,0.03)' },
-              ticks: { color: '#8b949e', font: { size: 9 }, maxRotation: 0 }
-            },
-            y: { 
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              ticks: { color: '#8b949e', font: { size: 10 } }
-            }
-          }
-        }
-      });
-    }
+  $('historyStatus').textContent=
+   'Histórico: '+getCandles(symbol).length+' velas cerradas';
 
-    function selectCoin(symbol, label, element) {
-      document.querySelectorAll('.coin-btn').forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
-      currentSymbol = symbol;
-      currentLabel = label;
-      candlePrices = [];
-      document.getElementById('app-header-title').innerText = `${label} Up or Down 5m`;
-      document.getElementById('stats-title').innerText = `Rendimiento Histórico 5M (${label})`;
-      document.getElementById('study-subtitle').innerText = `Análisis de fuerza de mercado para ${label}.`;
-      connectWebSocket();
-      updateStatsUI();
-      renderHistory();
-    }
+  createPrediction(symbol,nextFiveMinuteOpen());
 
-    function updateStatsUI() {
-      const stats = coinStats[currentSymbol] || { hits: 0, misses: 0, abstained: 0 };
-      document.getElementById('stat-hits').innerText = stats.hits;
-      document.getElementById('stat-misses').innerText = stats.misses;
-      document.getElementById('stat-abstained').innerText = stats.abstained;
-      
-      const totalEvaluated = stats.hits + stats.misses;
-      const accuracy = totalEvaluated > 0 ? ((stats.hits / totalEvaluated) * 100).toFixed(1) : "0.0";
-      document.getElementById('stat-accuracy').innerText = accuracy + "%";
-    }
+  renderMarket();
+  renderAnalysis();
 
-    function renderHistory() {
-      const list = coinStats[currentSymbol].history || [];
-      if (list.length === 0) {
-        document.getElementById('history-list').innerHTML = "Sin historial grabado aún para esta moneda.";
-      } else {
-        document.getElementById('history-list').innerHTML = list.map(item => 
-          `<div style="padding: 10px 0; border-bottom: 1px solid var(--card-border);">${item}</div>`
-        ).join('');
-      }
-    }
+ }catch(e){
+  $('historyStatus').textContent=
+   'No se pudo descargar el histórico. Se usarán datos en vivo si llegan.';
+  console.warn(e);
+ }
+}
 
-    function resetCurrentCoinStats() {
-      if (confirm(`¿Reiniciar estadísticas e historial de ${currentLabel}?`)) {
-        coinStats[currentSymbol] = { hits: 0, misses: 0, abstained: 0, history: [] };
-        saveToStorage();
-        updateStatsUI();
-        renderHistory();
-      }
-    }
+function ema(values,period){
+ if(values.length<period)return null;
 
-    function connectWebSocket() {
-      if (ws) ws.close();
+ const k=2/(period+1);
 
-      document.getElementById('conn-status').innerText = "Conectando...";
-      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${currentSymbol}@kline_5m`);
+ let result=values.slice(0,period).reduce((a,b)=>a+b,0)/period;
 
-      ws.onopen = () => {
-        document.getElementById('conn-status').innerText = `${currentLabel} Activo`;
-      };
+ for(let i=period;i<values.length;i++){
+  result=values[i]*k+result*(1-k);
+ }
 
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        const kline = data.k;
-        const currentPrice = parseFloat(kline.c);
-        const openPrice = parseFloat(kline.o);
-        const highPrice = parseFloat(kline.h);
-        const lowPrice = parseFloat(kline.l);
-        const isCandleClosed = kline.x;
+ return result;
+}
 
-        liveCurrentPrice = currentPrice;
-        candleCloseTime = kline.T;
+function calcRsi(values,period=14){
+ if(values.length<=period)return null;
 
-        const dec = currentPrice < 10 ? 4 : 2;
-        const diffVal = currentPrice - openPrice;
-        const diffSign = diffVal >= 0 ? "+$" : "-$";
+ let gains=0,losses=0;
 
-        document.getElementById('val-open').innerText = "$" + openPrice.toFixed(dec);
-        document.getElementById('val-current').innerText = "$" + currentPrice.toFixed(dec);
-        document.getElementById('val-current').className = "trading-val " + (diffVal >= 0 ? "green" : "orange");
-        
-        const diffElem = document.getElementById('val-diff');
-        diffElem.innerText = `${diffSign}${Math.abs(diffVal).toFixed(2)}`;
-        diffElem.className = diffVal >= 0 ? "green" : "red";
+ for(let i=values.length-period;i<values.length;i++){
+  const d=values[i]-values[i-1];
 
-        // Marcador Flotante
-        const floatTag = document.getElementById('chart-floating-price');
-        floatTag.innerText = "$" + currentPrice.toFixed(dec);
-        floatTag.style.background = diffVal >= 0 ? "rgba(46, 160, 67, 0.9)" : "rgba(240, 136, 62, 0.9)";
+  if(d>0)gains+=d;
+  else losses-=d;
+ }
 
-        if (currentCandleStart !== kline.t) {
-          currentCandleStart = kline.t;
-          candlePrices = [];
-        }
+ if(losses===0)return 100;
 
-        const timeStr = new Date(data.E).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        candlePrices.push({ price: currentPrice, time: timeStr });
+ const rs=(gains/period)/(losses/period);
 
-        // Estudio Técnico
-        document.getElementById('study-res').innerText = "$" + highPrice.toFixed(dec);
-        document.getElementById('study-sup').innerText = "$" + lowPrice.toFixed(dec);
-        document.getElementById('study-pattern').innerText = currentPrice >= openPrice ? "Escalón Alcista" : "Presión Bajista";
+ return 100-100/(1+rs);
+}
 
-        // Gráfica
-        if (chart) {
-          chart.data.labels = candlePrices.map(p => p.time);
-          chart.data.datasets[0].data = candlePrices.map(p => p.price);
-          chart.data.datasets[0].borderColor = currentPrice >= openPrice ? '#2ea043' : '#f0883e';
-          chart.data.datasets[1].data = Array(candlePrices.length).fill(openPrice);
-          chart.update();
-        }
+function indicators(symbol){
+ const arr=getCandles(symbol)
+  .filter(c=>c.closed)
+  .sort((a,b)=>a.t-b.t);
 
-        // CÁLCULO DEL POOL DINÁMICO & MULTIPLICADORES
-        const diffPercent = ((currentPrice - openPrice) / openPrice) * 100;
-        
-        // Cuotas dinámicas estilo Binance Pool (favorece al lado contrario según la tendencia)
-        currentUpMultiplier = (1.85 + (diffPercent * -2.5)).toFixed(2);
-        currentDownMultiplier = (1.85 + (diffPercent * 2.5)).toFixed(2);
+ const closes=arr.map(c=>c.c);
 
-        // Clampar entre 1.10x y 3.50x
-        currentUpMultiplier = Math.min(3.50, Math.max(1.10, currentUpMultiplier));
-        currentDownMultiplier = Math.min(3.50, Math.max(1.10, currentDownMultiplier));
+ if(closes.length<22){
+  return {ready:false,count:closes.length};
+ }
 
-        document.getElementById('mult-up-val').innerText = `Pago: ${currentUpMultiplier}x`;
-        document.getElementById('mult-down-val').innerText = `Pago: ${currentDownMultiplier}x`;
+ const e9=ema(closes.slice(-80),9);
+ const e21=ema(closes.slice(-100),21);
+ const rsi=calcRsi(closes,14);
 
-        const btnUp = document.getElementById('btn-up-card');
-        const btnDown = document.getElementById('btn-down-card');
+ const momentum=
+  (closes[closes.length-1]/closes[closes.length-4]-1)*100;
 
-        if (diffPercent >= 0) {
-          btnUp.className = "pred-btn up-active";
-          btnDown.className = "pred-btn";
-        } else {
-          btnUp.className = "pred-btn";
-          btnDown.className = "pred-btn down-active";
-        }
+ const changes=[];
 
-        let confidence = Math.min(95, Math.max(50, 50 + Math.abs(diffPercent) * 100)).toFixed(1);
-        let recommendation = confidence > 65 ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
-        document.getElementById('pred-recommendation').innerText = recommendation;
-        document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
+ for(let i=Math.max(1,closes.length-15);i<closes.length;i++){
+  changes.push((closes[i]/closes[i-1]-1)*100);
+ }
 
-        // Información en vivo de la posición activa
-        if (activeTrade) {
-          const tradeDiff = currentPrice - activeTrade.entryPrice;
-          const isWinning = (activeTrade.type === 'UP' && tradeDiff > 0) || (activeTrade.type === 'DOWN' && tradeDiff < 0);
-          document.getElementById('active-trade-info').innerHTML = `
-            Tipo: <b class="${activeTrade.type === 'UP' ? 'green' : 'red'}">${activeTrade.type}</b> | 
-            Entrada: <b>$${activeTrade.entryPrice.toFixed(dec)}</b> | 
-            Cuota: <b>${activeTrade.multiplier}x</b> |
-            Estado: <b class="${isWinning ? 'green' : 'red'}">${isWinning ? 'GANANDO' : 'PERDIENDO'}</b>
-          `;
-        }
+ const volatility=changes.length?
+  Math.sqrt(changes.reduce((s,x)=>s+x*x,0)/changes.length):0;
 
-        // Cierre de vela
-        if (isCandleClosed) {
-          resolveDemoTrade(currentPrice);
+ return {
+  ready:true,
+  count:closes.length,
+  e9,e21,rsi,momentum,volatility,
+  last:closes.at(-1),
+  previous:closes.at(-2),
+  time:arr.at(-1).t
+ };
+}
 
-          if (lastSignal) {
-            let resultText = "";
-            if (lastSignal.recommendation.includes("NO ENTRAR")) {
-              coinStats[currentSymbol].abstained++;
-              resultText = "⚠️ Abstención";
-            } else {
-              const realDirection = currentPrice >= openPrice ? "UP" : "DOWN";
-              if (lastSignal.direction === realDirection) {
-                coinStats[currentSymbol].hits++;
-                resultText = "✅ Acierto";
-              } else {
-                coinStats[currentSymbol].misses++;
-                resultText = "❌ Fallo";
-              }
-            }
-            
-            const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            coinStats[currentSymbol].history.unshift(`[${timeStamp}] Inicial: $${openPrice.toFixed(dec)} | Cierre: $${currentPrice.toFixed(dec)} | Pred: ${lastSignal.direction} | ${resultText}`);
-            
-            saveToStorage();
-            updateStatsUI();
-            renderHistory();
-          }
+function calculateSignal(symbol){
+ const x=indicators(symbol);
 
-          lastSignal = {
-            time: kline.t,
-            direction: diffPercent >= 0 ? "UP" : "DOWN",
-            confidence: confidence,
-            recommendation: recommendation
-          };
-        }
-      };
-    }
+ if(!x.ready){
+  return {
+   direction:'ABSTAIN',
+   score:0,
+   reason:'Se necesitan al menos 22 velas cerradas.',
+   features:x
+  };
+ }
 
-    window.onload = () => {
-      initChart();
-      connectWebSocket();
-      updateStatsUI();
-      renderHistory();
-      updateDemoUI();
-    };
-  </script>
+ let points=0;
+ const reasons=[];
 
+ if(x.e9>x.e21){
+  points++;
+  reasons.push('EMA 9 sobre EMA 21');
+ }else if(x.e9<x.e21){
+  points--;
+  reasons.push('EMA 9 bajo EMA 21');
+ }
+
+ if(x.rsi>=52&&x.rsi<=70){
+  points++;
+  reasons.push('RSI alcista');
+ }else if(x.rsi<=48&&x.rsi>=30){
+  points--;
+  reasons.push('RSI bajista');
+ }
+
+ if(x.momentum>0.04){
+  points++;
+  reasons.push('Momentum positivo');
+ }else if(x.momentum< -0.04){
+  points--;
+  reasons.push('Momentum negativo');
+ }
+
+ if(x.volatility>1.2){
+  return {
+   direction:'ABSTAIN',
+   score:Math.abs(points),
+   reason:'Volatilidad elevada; mejor abstenerse.',
+   features:x
+  };
+ }
+
+ const direction=
+  points>=MIN_SIGNAL_SCORE?'UP':
+  points<=-MIN_SIGNAL_SCORE?'DOWN':
+  'ABSTAIN';
+
+ return {
+  direction,
+  score:Math.min(100,Math.round(Math.abs(points)/3*100)),
+  reason:direction==='ABSTAIN'?
+   'Las reglas no coinciden suficientemente.':
+   reasons.join(' · '),
+  features:x
+ };
+}
+
+function createPrediction(symbol,targetOpenTime){
+ const key=targetKey(symbol,targetOpenTime);
+
+ if(predictions[key])return predictions[key];
+
+ const existing=state.signals.find(s=>s.id===key);
+
+ if(existing){
+  predictions[key]=existing;
+  return existing;
+ }
+
+ const result=calculateSignal(symbol);
+
+ const p={
+  id:key,
+  symbol,
+  targetOpenTime,
+  direction:result.direction,
+  score:result.score,
+  reason:result.reason,
+  features:result.features,
+  createdAt:Date.now(),
+  resolved:false,
+  result:null
+ };
+
+ predictions[key]=p;
+
+ state.signals.unshift(p);
+
+ if(state.signals.length>1500){
+  state.signals.length=1500;
+ }
+
+ if(p.direction==='ABSTAIN'){
+  state.stats[symbol].abstains++;
+ }
+
+ saveState();
+ renderSignal(p);
+ renderStats();
+ renderHistory();
+
+ return p;
+}
+
+function resolvePrediction(symbol,candle){
+ const key=targetKey(symbol,candle.t);
+
+ const p=predictions[key]||
+  state.signals.find(s=>s.id===key);
+
+ if(!p||p.resolved)return;
+
+ p.resolved=true;
+ p.closedAt=Date.now();
+ p.actualDirection=
+  candle.c>candle.o?'UP':
+  candle.c<candle.o?'DOWN':'FLAT';
+
+ p.open=candle.o;
+ p.close=candle.c;
+
+ if(p.direction==='UP'||p.direction==='DOWN'){
+  const correct=p.direction===p.actualDirection;
+  p.result=correct?'WIN':'LOSS';
+
+  const s=state.stats[symbol];
+
+  s.totalDirectional++;
+
+  if(correct){
+   s.wins++;
+   s.correct++;
+  }else{
+   s.losses++;
+  }
+
+ }else{
+  p.result='ABSTAIN';
+ }
+
+ saveState();
+ renderStats();
+ renderHistory();
+ renderAnalysis();
+}
+
+function renderSignal(p){
+ if(!p)return;
+
+ const d=$('direction');
+ const badge=$('signalBadge');
+
+ d.textContent=
+  p.direction==='UP'?'↑ ARRIBA':
+  p.direction==='DOWN'?'↓ ABAJO':
+  '— ABSTENERSE';
+
+ d.className='signal-direction '+
+  (p.direction==='UP'?'up':
+   p.direction==='DOWN'?'down':'neutral');
+
+ badge.textContent=
+  p.direction==='ABSTAIN'?'No entrar':
+  'Señal experimental';
+
+ badge.className='badge '+
+  (p.direction==='ABSTAIN'?'yellow':'green');
+
+ $('score').textContent=
+  p.direction==='ABSTAIN'?'Sin señal':p.score+'/100';
+
+ $('scoreMeter').style.width=p.score+'%';
+
+ $('recommendation').textContent=
+  p.direction==='ABSTAIN'?'NO ENTRAR':'Solo prueba demo';
+
+ $('signalReason').textContent=p.reason||'';
+}
+
+function renderMarket(){
+ const p=lastPrice[currentSymbol]??currentCandle[currentSymbol]?.c;
+
+ $('price').textContent=
+  Number.isFinite(p)?fmtPrice(p)+' USDT':'—';
+
+ const c=currentCandle[currentSymbol];
+
+ if(c){
+  const change=(c.c/c.o-1)*100;
+
+  $('priceChange').textContent=
+   (change>=0?'+':'')+change.toFixed(3)+'% en vela actual';
+
+  $('priceChange').className=
+   'small '+(change>=0?'up':'down');
+ }
+
+ const remain=Math.max(0,Math.floor(
+  (nextFiveMinuteOpen()-Date.now())/1000
+ ));
+
+ $('countdown').textContent=
+  'Próxima vela: '+
+  String(Math.floor(remain/60)).padStart(2,'0')+':'+
+  String(remain%60).padStart(2,'0');
+
+ drawChart(getCandles(currentSymbol));
+
+ const latest=state.signals.find(s=>
+  s.symbol===currentSymbol&&
+  !s.resolved&&
+  s.targetOpenTime>=Date.now()-300000
+ );
+
+ if(latest)renderSignal(latest);
+
+ const x=indicators(currentSymbol);
+
+ $('rsiBadge').textContent='RSI: '+(x.ready?x.rsi.toFixed(1):'—');
+
+ $('emaBadge').textContent='EMA: '+(
+  x.ready?(x.e9>x.e21?'Alcista':x.e9<x.e21?'Bajista':'Neutral'):'—'
+ );
+
+ $('volBadge').textContent='Volatilidad: '+
+  (x.ready?x.volatility.toFixed(3)+'%':'—');
+}
+
+function drawChart(arr){
+ const canvas=$('chart');
+ const ctx=canvas.getContext('2d');
+
+ if(!ctx)return;
+
+ const dpr=window.devicePixelRatio||1;
+ const rect=canvas.getBoundingClientRect();
+ const w=Math.max(300,rect.width);
+ const h=190;
+
+ if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+  canvas.width=Math.round(w*dpr);
+  canvas.height=Math.round(h*dpr);
+ }
+
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ ctx.clearRect(0,0,w,h);
+ ctx.fillStyle='#0a1323';
+ ctx.fillRect(0,0,w,h);
+
+ const data=arr.slice(-55)
+  .map(c=>c.c)
+  .filter(Number.isFinite);
+
+ if(data.length<2){
+  ctx.fillStyle='#91a2bd';
+  ctx.font='13px system-ui';
+  ctx.fillText('Cargando velas...',15,30);
+  return;
+ }
+
+ const min=Math.min(...data);
+ const max=Math.max(...data);
+ const pad=(max-min)*0.12||max*0.001||1;
+ const lo=min-pad;
+ const hi=max+pad;
+
+ ctx.strokeStyle='#263650';
+
+ for(let i=1;i<=3;i++){
+  const y=h*i/4;
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(w,y);
+  ctx.stroke();
+ }
+
+ ctx.strokeStyle='#7c9cff';
+ ctx.lineWidth=2;
+ ctx.beginPath();
+
+ data.forEach((v,i)=>{
+  const x=8+i*(w-16)/(data.length-1);
+  const y=h-15-(v-lo)/(hi-lo)*(h-30);
+
+  if(i===0)ctx.moveTo(x,y);
+  else ctx.lineTo(x,y);
+ });
+
+ ctx.stroke();
+
+ ctx.fillStyle='#91a2bd';
+ ctx.font='10px system-ui';
+ ctx.fillText(fmtPrice(max),8,13);
+ ctx.fillText(fmtPrice(min),8,h-3);
+}
+
+function renderStats(){
+ const s=state.stats[currentSymbol]||blankStats();
+
+ $('wins').textContent=s.wins;
+ $('losses').textContent=s.losses;
+ $('abstains').textContent=s.abstains;
+
+ $('accuracy').textContent=
+  s.totalDirectional?pct(s.correct/s.totalDirectional*100):'—';
+
+ $('balance').textContent=fmtMoney(state.balance);
+ $('pnl').textContent=fmtMoney(state.realizedPnl);
+
+ $('pnl').className=
+  state.realizedPnl>=0?'success':'error';
+
+ $('closedTrades').textContent=
+  state.trades.filter(t=>t.status==='CLOSED').length;
+
+ $('openTrades').textContent=
+  state.trades.filter(t=>t.status==='OPEN').length;
+
+ $('allStats').innerHTML=Object.keys(SYMBOLS).map(sym=>{
+  const a=state.stats[sym]||blankStats();
+
+  return `<tr>
+  <td>${sym.replace('USDT','')}</td>
+  <td class="success">${a.wins}</td>
+  <td class="error">${a.losses}</td>
+  <td>${a.abstains}</td>
+  <td>${a.totalDirectional?pct(a.correct/a.totalDirectional*100):'—'}</td>
+  </tr>`;
+ }).join('');
+
+ renderTrades();
+}
+
+function renderAnalysis(){
+ const x=indicators(currentSymbol);
+
+ $('rsiValue').textContent=x.ready?x.rsi.toFixed(2):'—';
+
+ $('rsiText').textContent=x.ready?
+  (x.rsi>70?'Sobrecompra':
+   x.rsi<30?'Sobreventa':'Zona intermedia'):
+  'Faltan velas';
+
+ $('emaValue').textContent=x.ready?
+  fmtPrice(x.e9)+' / '+fmtPrice(x.e21):'—';
+
+ $('emaText').textContent=x.ready?
+  (x.e9>x.e21?'EMA9 sobre EMA21':'EMA9 bajo EMA21'):
+  'Faltan velas';
+
+ $('momentumValue').textContent=x.ready?pct(x.momentum):'—';
+
+ $('momentumText').textContent=x.ready?
+  (x.momentum>=0?'Movimiento positivo':'Movimiento negativo'):
+  'Faltan velas';
+
+ $('volatilityValue').textContent=x.ready?pct(x.volatility):'—';
+
+ $('volatilityText').textContent=x.ready?
+  (x.volatility>1.2?'Volatilidad elevada':'Variación reciente'):
+  'Faltan velas';
+}
+
+function renderHistory(){
+ const rows=state.signals.slice(0,150);
+
+ $('signalCount').textContent=state.signals.length+' registros';
+
+ $('signalTable').innerHTML=rows.map(p=>`
+ <tr>
+ <td>${fmtDate(p.createdAt)}</td>
+ <td>${(p.symbol||'').replace('USDT','')}</td>
+ <td class="${p.direction==='UP'?'up':p.direction==='DOWN'?'down':'neutral'}">
+ ${p.direction==='UP'?'ARRIBA':p.direction==='DOWN'?'ABAJO':'ABSTENERSE'}
+ </td>
+ <td>${p.score??'—'}</td>
+ <td>${
+  p.resolved?
+   (p.result==='WIN'?'<span class="success">Acierto</span>':
+    p.result==='LOSS'?'<span class="error">Fallo</span>':'Abstención'):
+   'Pendiente'
+ }</td>
+ </tr>`).join('')||
+ '<tr><td colspan="5">Todavía no hay señales.</td></tr>';
+}
+
+function resolveTrades(symbol,candle){
+ state.trades.filter(t=>
+  t.status==='OPEN'&&
+  t.symbol===symbol&&
+  t.targetOpenTime===candle.t
+ ).forEach(t=>{
+  const actual=
+   candle.c>candle.o?'UP':
+   candle.c<candle.o?'DOWN':'FLAT';
+
+  t.status='CLOSED';
+  t.closedAt=Date.now();
+  t.open=candle.o;
+  t.close=candle.c;
+
+  const win=t.direction===actual;
+
+  t.pnl=actual==='FLAT'?0:(win?t.stake:-t.stake);
+
+  state.balance+=t.pnl;
+  state.realizedPnl+=t.pnl;
+
+  t.result=actual==='FLAT'?'PLANA':win?'GANÓ':'PERDIÓ';
+ });
+
+ saveState();
+ renderStats();
+}
+
+function openDemoTrade(){
+ const stake=Number($('stake').value);
+ const chosen=$('tradeDirection').value;
+
+ if(!Number.isFinite(stake)||stake<=0){
+  $('simMessage').textContent='Escribe un monto mayor que cero.';
+  return;
+ }
+
+ if(stake>state.balance){
+  $('simMessage').textContent='El monto supera el saldo virtual.';
+  return;
+ }
+
+ const target=nextFiveMinuteOpen();
+ const key=targetKey(currentSymbol,target);
+
+ const p=predictions[key]||state.signals.find(s=>s.id===key);
+
+ const direction=
+  chosen==='AUTO'?
+   (p&&p.direction!=='ABSTAIN'?p.direction:null):
+   chosen;
+
+ if(!direction){
+  $('simMessage').textContent=
+   'No hay señal direccional. Elige ARRIBA/ABAJO o espera.';
+  return;
+ }
+
+ if(state.trades.some(t=>
+  t.status==='OPEN'&&
+  t.symbol===currentSymbol&&
+  t.targetOpenTime===target
+ )){
+  $('simMessage').textContent=
+   'Ya existe una operación para esta moneda y vela.';
+  return;
+ }
+
+ state.trades.push({
+  id:'trade_'+Date.now(),
+  symbol:currentSymbol,
+  direction,
+  stake,
+  targetOpenTime:target,
+  openedAt:Date.now(),
+  status:'OPEN',
+  pnl:0
+ });
+
+ saveState();
+ renderStats();
+
+ $('simMessage').textContent=
+  'Operación demo creada. Se resolverá al cierre de la vela objetivo.';
+}
+
+function exportCsv(){
+ const esc=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+
+ const rows=[[
+  'fecha','moneda','direccion','puntuacion',
+  'resultado','direccion_real','apertura','cierre','motivo'
+ ]];
+
+ state.signals.slice().reverse().forEach(p=>{
+  rows.push([
+   fmtDate(p.createdAt),
+   p.symbol,
+   p.direction,
+   p.score,
+   p.result||'PENDIENTE',
+   p.actualDirection,
+   p.open,
+   p.close,
+   p.reason
+  ]);
+ });
+
+ const blob=new Blob([
+  '\ufeff'+rows.map(r=>r.map(esc).join(',')).join('\r\n')
+ ],{type:'text/csv;charset=utf-8;'});
+
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+
+ a.href=url;
+ a.download='btc5m-historial.csv';
+
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+
+ URL.revokeObjectURL(url);
+}
+
+function renderTrades(){
+ const open=state.trades.filter(t=>t.status==='OPEN');
+
+ $('openTradeList').innerHTML=open.length?
+  open.map(t=>`
+   <div class="stat" style="margin:7px 0">
+   <strong>${t.symbol.replace('USDT','')} · ${t.direction==='UP'?'ARRIBA':'ABAJO'}</strong>
+   <span class="small muted">Monto ${fmtMoney(t.stake)} · vela ${fmtTime(t.targetOpenTime)}</span>
+   </div>`).join(''):
+  'No hay operaciones abiertas.';
+
+ const closed=state.trades
+  .filter(t=>t.status==='CLOSED')
+  .slice(-25)
+  .reverse();
+
+ $('tradeTable').innerHTML=closed.map(t=>`
+ <tr>
+ <td>${fmtDate(t.closedAt)}</td>
+ <td>${t.symbol.replace('USDT','')}</td>
+ <td>${t.direction==='UP'?'ARRIBA':'ABAJO'}</td>
+ <td class="${t.pnl>=0?'success':'error'}">${t.result}</td>
+ <td class="${t.pnl>=0?'success':'error'}">${fmtMoney(t.pnl)}</td>
+ </tr>`).join('')||
+ '<tr><td colspan="5">Sin operaciones cerradas.</td></tr>';
+}
+
+function changeSymbol(symbol){
+ if(!SYMBOLS[symbol])return;
+
+ currentSymbol=symbol;
+
+ document.querySelectorAll('.coin').forEach(b=>{
+  b.classList.toggle('active',b.dataset.symbol===symbol);
+ });
+
+ $('coinTitle').textContent=
+  SYMBOLS[symbol]+' · '+symbol.replace('USDT','/USDT');
+
+ connect();
+ loadHistory(symbol);
+ renderMarket();
+ renderStats();
+ renderAnalysis();
+}
+
+document.querySelectorAll('.coin').forEach(b=>{
+ b.addEventListener('click',()=>changeSymbol(b.dataset.symbol));
+});
+
+document.querySelectorAll('.tabs button').forEach(b=>{
+ b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>{
+   x.classList.toggle('active',x===b);
+  });
+
+  document.querySelectorAll('.page').forEach(x=>{
+   x.classList.remove('active');
+  });
+
+  $('page-'+b.dataset.page).classList.add('active');
+
+  if(b.dataset.page==='analysis')renderAnalysis();
+  if(b.dataset.page==='history')renderHistory();
+ });
+});
+
+$('refreshHistory').addEventListener('click',()=>loadHistory(currentSymbol));
+
+$('openTrade').addEventListener('click',openDemoTrade);
+
+$('resetDemo').addEventListener('click',()=>{
+ if(!confirm('¿Reiniciar saldo y operaciones?'))return;
+
+ state.balance=10000;
+ state.initialBalance=10000;
+ state.realizedPnl=0;
+ state.trades=[];
+
+ saveState();
+ renderStats();
+
+ $('simMessage').textContent='Simulador reiniciado a $10,000 virtuales.';
+});
+
+$('exportCsv').addEventListener('click',exportCsv);
+
+$('clearHistory').addEventListener('click',()=>{
+ if(!confirm('¿Borrar historial y estadísticas?'))return;
+
+ state.signals=[];
+ state.stats={};
+
+ Object.keys(SYMBOLS).forEach(s=>{
+  state.stats[s]=blankStats();
+ });
+
+ predictions={};
+
+ saveState();
+ renderStats();
+ renderHistory();
+ renderAnalysis();
+});
+
+window.addEventListener('resize',()=>drawChart(getCandles(currentSymbol)));
+
+setInterval(renderMarket,1000);
+setInterval(renderStats,10000);
+
+function restorePending(){
+ state.signals.forEach(p=>{
+  if(!p.resolved&&p.id)predictions[p.id]=p;
+ });
+}
+
+restorePending();
+
+renderStats();
+renderHistory();
+renderAnalysis();
+
+connect();
+loadHistory(currentSymbol);
+
+})();
+</script>
 </body>
 </html>
