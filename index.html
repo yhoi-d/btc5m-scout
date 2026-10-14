@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>BTC 5M AI Lab Pro</title>
+  <title>BTC 5M AI Lab Pro - Pool Dinámico</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -109,7 +109,7 @@
       font-weight: 800;
     }
 
-    /* Botones UP / DOWN Visuales */
+    /* Botones UP / DOWN Visuales con Multiplicador */
     .prediction-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -142,11 +142,14 @@
       justify-content: center;
       gap: 6px;
     }
-    .pred-prob {
-      font-size: 12px;
-      color: var(--text-sub);
+    .pred-multiplier {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.08);
       margin-top: 4px;
-      font-weight: 600;
+      display: inline-block;
+      font-weight: bold;
     }
     
     .grid-2 {
@@ -220,19 +223,9 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .btn-green {
-      background: #2ea043;
-      color: white;
-    }
-    .btn-red {
-      background: #da3633;
-      color: white;
-    }
-    .btn-danger {
-      background: rgba(248, 81, 73, 0.15);
-      color: var(--red);
-      border: 1px solid rgba(248, 81, 73, 0.3);
-    }
+    .btn-green { background: #2ea043; color: white; }
+    .btn-red { background: #da3633; color: white; }
+    .btn-danger { background: rgba(248, 81, 73, 0.15); color: var(--red); border: 1px solid rgba(248, 81, 73, 0.3); }
 
     .target-badge {
       background: #21262d;
@@ -243,7 +236,6 @@
       font-weight: bold;
     }
 
-    /* Marcador Flotante */
     #chart-floating-price {
       position: absolute;
       right: 8px;
@@ -257,10 +249,8 @@
       pointer-events: none;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       z-index: 10;
-      transition: background 0.3s ease;
     }
 
-    /* Panel Simulador */
     .amount-btn {
       background: var(--bg-color);
       border: 1px solid var(--card-border);
@@ -284,7 +274,7 @@
   <div class="header">
     <div>
       <h2 style="margin:0; font-size: 17px; font-weight: 800;" id="app-header-title">BTC Up or Down 5m</h2>
-      <span style="font-size: 11px; color: var(--text-sub);">Predicción de Precio en Tiempo Real</span>
+      <span style="font-size: 11px; color: var(--text-sub);">Predicción Binance Pool Dinámico</span>
     </div>
     <div id="conn-status" class="status-badge">Conectando...</div>
   </div>
@@ -298,7 +288,7 @@
     <button class="coin-btn" onclick="selectCoin('xrpusdt', 'XRP/USDT', this)">✕ XRP</button>
   </div>
 
-  <!-- SECCIÓN 1: INICIO Y GRÁFICO -->
+  <!-- SECCIÓN 1: INICIO -->
   <div id="tab-inicio" class="tab-content active">
     <div class="card">
       <div class="trading-header">
@@ -328,14 +318,15 @@
       </div>
     </div>
 
+    <!-- BOTONES UP / DOWN CON MULTIPLICADOR DINÁMICO -->
     <div class="prediction-buttons">
       <div id="btn-up-card" class="pred-btn">
         <div class="pred-title green">↗ Up</div>
-        <div id="prob-up-val" class="pred-prob">50.0%</div>
+        <div id="mult-up-val" class="pred-multiplier green">Pago: 1.85x</div>
       </div>
       <div id="btn-down-card" class="pred-btn">
         <div class="pred-title red">↘ Down</div>
-        <div id="prob-down-val" class="pred-prob">50.0%</div>
+        <div id="mult-down-val" class="pred-multiplier red">Pago: 1.85x</div>
       </div>
     </div>
 
@@ -349,7 +340,7 @@
   <!-- SECCIÓN 2: SIMULADOR DE TRADING DEMO -->
   <div id="tab-simulador" class="tab-content">
     <div class="card">
-      <div class="card-title">Balance de Cuenta Demo (Ficticia)</div>
+      <div class="card-title">Balance de Cuenta Demo</div>
       <div class="grid-3" style="margin-top: 8px;">
         <div class="stat-box">
           <div style="font-size:10px; color:var(--text-sub);">Saldo Demo</div>
@@ -367,9 +358,9 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Operar en Vivo con Señal AI</div>
+      <div class="card-title">Entrar al Pool en Vivo</div>
       <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 10px;">
-        Monto por Operación (USDT Virtual):
+        Monto a apostar (USDT Virtual):
       </div>
       <div class="grid-4" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
         <button class="amount-btn selected" onclick="setTradeAmount(10, this)">$10</button>
@@ -379,15 +370,15 @@
       </div>
 
       <div class="grid-2">
-        <button class="btn-green" onclick="placeDemoTrade('UP')">Comprar UP ↗</button>
-        <button class="btn-red" onclick="placeDemoTrade('DOWN')">Comprar DOWN ↘</button>
+        <button class="btn-green" onclick="placeDemoTrade('UP')">Apostar UP ↗</button>
+        <button class="btn-red" onclick="placeDemoTrade('DOWN')">Apostar DOWN ↘</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Operación Activa</div>
+      <div class="card-title">Posición en Curso</div>
       <div id="active-trade-info" style="font-size: 12px; color: var(--text-sub); text-align: center; padding: 6px 0;">
-        No hay operaciones activas en la vela actual.
+        Sin posiciones abiertas en esta vela.
       </div>
     </div>
   </div>
@@ -417,10 +408,6 @@
           • Máximo Alcanzado: <b id="study-res" class="green">$--.----</b><br>
           • Mínimo Alcanzado: <b id="study-sup" class="red">$--.----</b>
         </div>
-      </div>
-
-      <div style="font-size: 11px; color: var(--text-sub); text-align: center;">
-        *Análisis calculado en tiempo real con datos directos de Binance.
       </div>
     </div>
   </div>
@@ -489,8 +476,12 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
-    let liveCurrentPrice = 0; // Guardamos el precio en tiempo real
+    let liveCurrentPrice = 0;
     
+    // Multiplicadores dinámicos del Pool
+    let currentUpMultiplier = 1.85;
+    let currentDownMultiplier = 1.85;
+
     // Variables Simulador Demo
     let demoAmount = 10;
     let activeTrade = null;
@@ -534,27 +525,25 @@
       demoAmount = amount;
     }
 
-    // Toma el PRECIO EXACTO AL MOMENTO DE ENTRAR
+    // REGISTRO DE ENTRADA CON EL MULTIPLICADOR Y PRECIO EN ESE SEGUNDO
     function placeDemoTrade(type) {
       if (activeTrade) {
-        alert("Ya tienes una operación activa en esta vela.");
+        alert("Ya tienes una posición abierta en esta vela.");
         return;
       }
       if (demoData.balance < demoAmount) {
         alert("Saldo Demo insuficiente.");
         return;
       }
-      if (liveCurrentPrice <= 0) {
-        alert("Aún cargando el precio en vivo...");
-        return;
-      }
 
-      // Se fija la cotización de entrada actual en tiempo real
+      const lockedMultiplier = type === 'UP' ? currentUpMultiplier : currentDownMultiplier;
+
       activeTrade = {
         symbol: currentSymbol,
         type: type,
         entryPrice: liveCurrentPrice,
-        amount: demoAmount
+        amount: demoAmount,
+        multiplier: lockedMultiplier
       };
 
       demoData.balance -= demoAmount;
@@ -563,11 +552,13 @@
 
       const dec = liveCurrentPrice < 10 ? 4 : 2;
       document.getElementById('active-trade-info').innerHTML = `
-        Operación: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | Entrada Exacta: <b>$${liveCurrentPrice.toFixed(dec)}</b> | Monto: <b>$${demoAmount} USD</b>
+        Tipo: <b class="${type === 'UP' ? 'green' : 'red'}">${type}</b> | 
+        Entrada: <b>$${liveCurrentPrice.toFixed(dec)}</b> | 
+        Cuota Fijada: <b>${lockedMultiplier}x</b>
       `;
     }
 
-    // Se evalúa contra el PRECIO DE CIERRE de la vela
+    // RESOLUCIÓN SEGÚN MULTIPLICADOR CONSEGUIDO AL ENTRAR
     function resolveDemoTrade(closePrice) {
       if (!activeTrade) return;
 
@@ -579,16 +570,18 @@
 
       if (isWin) {
         demoData.wins++;
-        const profit = activeTrade.amount * 1.85; // Pago del 85%
-        demoData.balance += profit;
-        alert(`🎉 ¡Operación Ganada!\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nGanancia: +$${(activeTrade.amount * 0.85).toFixed(2)} USDT`);
+        const totalPayout = activeTrade.amount * activeTrade.multiplier;
+        const profit = totalPayout - activeTrade.amount;
+        demoData.balance += totalPayout;
+
+        alert(`🎉 ¡Operación Ganada!\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nCuota: ${activeTrade.multiplier}x | Ganancia: +$${profit.toFixed(2)} USDT`);
       } else {
         demoData.losses++;
         alert(`❌ Operación Perdida\nEntrada: $${activeTrade.entryPrice.toFixed(dec)} | Cierre: $${closePrice.toFixed(dec)}\nPérdida: -$${activeTrade.amount} USDT`);
       }
 
       activeTrade = null;
-      document.getElementById('active-trade-info').innerText = "No hay operaciones activas en la vela actual.";
+      document.getElementById('active-trade-info').innerText = "Sin posiciones abiertas en esta vela.";
       saveToStorage();
       updateDemoUI();
     }
@@ -754,13 +747,19 @@
           chart.update();
         }
 
-        // Cálculos UP / DOWN
+        // CÁLCULO DEL POOL DINÁMICO & MULTIPLICADORES
         const diffPercent = ((currentPrice - openPrice) / openPrice) * 100;
-        let upProb = Math.min(92, Math.max(8, 50 + diffPercent * 120)).toFixed(1);
-        let downProb = (100 - upProb).toFixed(1);
+        
+        // Cuotas dinámicas estilo Binance Pool (favorece al lado contrario según la tendencia)
+        currentUpMultiplier = (1.85 + (diffPercent * -2.5)).toFixed(2);
+        currentDownMultiplier = (1.85 + (diffPercent * 2.5)).toFixed(2);
 
-        document.getElementById('prob-up-val').innerText = `${upProb}%`;
-        document.getElementById('prob-down-val').innerText = `${downProb}%`;
+        // Clampar entre 1.10x y 3.50x
+        currentUpMultiplier = Math.min(3.50, Math.max(1.10, currentUpMultiplier));
+        currentDownMultiplier = Math.min(3.50, Math.max(1.10, currentDownMultiplier));
+
+        document.getElementById('mult-up-val').innerText = `Pago: ${currentUpMultiplier}x`;
+        document.getElementById('mult-down-val').innerText = `Pago: ${currentDownMultiplier}x`;
 
         const btnUp = document.getElementById('btn-up-card');
         const btnDown = document.getElementById('btn-down-card');
@@ -773,23 +772,24 @@
           btnDown.className = "pred-btn down-active";
         }
 
-        let confidence = Math.max(upProb, downProb);
+        let confidence = Math.min(95, Math.max(50, 50 + Math.abs(diffPercent) * 100)).toFixed(1);
         let recommendation = confidence > 65 ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
 
-        // Actualizar información en tiempo real de la operación Demo si está activa
+        // Información en vivo de la posición activa
         if (activeTrade) {
           const tradeDiff = currentPrice - activeTrade.entryPrice;
           const isWinning = (activeTrade.type === 'UP' && tradeDiff > 0) || (activeTrade.type === 'DOWN' && tradeDiff < 0);
           document.getElementById('active-trade-info').innerHTML = `
             Tipo: <b class="${activeTrade.type === 'UP' ? 'green' : 'red'}">${activeTrade.type}</b> | 
             Entrada: <b>$${activeTrade.entryPrice.toFixed(dec)}</b> | 
-            Estado: <b class="${isWinning ? 'green' : 'red'}">${isWinning ? 'GANANDO' : 'PERDIENDO'} ($${tradeDiff >= 0 ? '+' : ''}${tradeDiff.toFixed(2)})</b>
+            Cuota: <b>${activeTrade.multiplier}x</b> |
+            Estado: <b class="${isWinning ? 'green' : 'red'}">${isWinning ? 'GANANDO' : 'PERDIENDO'}</b>
           `;
         }
 
-        // Al cerrar la vela de 5 minutos, liquidamos la operación demo usando el precio de entrada
+        // Cierre de vela
         if (isCandleClosed) {
           resolveDemoTrade(currentPrice);
 
