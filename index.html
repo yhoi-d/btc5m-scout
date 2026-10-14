@@ -109,7 +109,7 @@
       font-weight: 800;
     }
 
-    /* Botones de Predicción Visuales UP / DOWN */
+    /* Botones UP / DOWN Visuales */
     .prediction-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -199,7 +199,7 @@
       font-size: 10px;
       font-weight: 600;
       cursor: pointer;
-      width: 25%;
+      width: 20%;
     }
     .nav-item.active {
       color: var(--blue);
@@ -246,6 +246,35 @@
       z-index: 10;
       transition: background 0.3s ease;
     }
+
+    /* Estilos para la sección de Ajustes */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .setting-sub {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    select, input[type="checkbox"] {
+      accent-color: var(--blue);
+    }
+    select {
+      background: var(--bg-color);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -270,8 +299,6 @@
 
   <!-- SECCIÓN 1: INICIO Y GRÁFICO -->
   <div id="tab-inicio" class="tab-content active">
-    
-    <!-- ENCABEZADO TIPO TARGET -->
     <div class="card">
       <div class="trading-header">
         <div>
@@ -289,7 +316,6 @@
       </div>
     </div>
 
-    <!-- GRÁFICO DE PASOS CON MARCADOR FLOTANTE -->
     <div class="card" style="position: relative;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span class="card-title" style="margin:0;">Trayectoria 5M</span>
@@ -301,7 +327,6 @@
       </div>
     </div>
 
-    <!-- BOTONES DE PREDICCIÓN VISUALES UP / DOWN -->
     <div class="prediction-buttons">
       <div id="btn-up-card" class="pred-btn">
         <div class="pred-title green">↗ Up</div>
@@ -313,7 +338,6 @@
       </div>
     </div>
 
-    <!-- RECOMENDACIÓN DE ENTRADA -->
     <div class="card" style="margin-top: 12px; text-align: center;">
       <div style="font-size: 12px; color: var(--text-sub);">
         Recomendación AI: <b id="pred-recommendation" class="yellow">ESPERANDO CIERRE</b>
@@ -392,23 +416,74 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 5: AJUSTES Y RELOJ UTC -->
+  <div id="tab-ajustes" class="tab-content">
+    <!-- Reloj UTC Servidor -->
+    <div class="card">
+      <div class="card-title">Servidor Binance & Horario UTC</div>
+      <div class="grid-2" style="margin-top: 8px;">
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Hora UTC Binance</div>
+          <div id="clock-utc" class="stat-val blue" style="font-size:16px;">00:00:00</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:10px; color:var(--text-sub);">Hora Local</div>
+          <div id="clock-local" class="stat-val green" style="font-size:16px;">00:00:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuración de Notificaciones -->
+    <div class="card">
+      <div class="card-title">Configuración de Alertas</div>
+      
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Notificaciones Push</div>
+          <div class="setting-sub">Alertas al celular sobre señales de alta probabilidad.</div>
+        </div>
+        <input type="checkbox" id="check-notifications" onchange="toggleNotifications(this.checked)" style="transform: scale(1.3);">
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Umbral de Confianza Requerido</div>
+          <div class="setting-sub">Nivel mínimo para enviar alertas.</div>
+        </div>
+        <select id="select-threshold" onchange="updateThreshold(this.value)">
+          <option value="60">60% Confianza</option>
+          <option value="70" selected>70% Confianza</option>
+          <option value="80">80% Confianza</option>
+        </select>
+      </div>
+
+      <button style="margin-top: 14px; background: rgba(58, 166, 255, 0.15); color: var(--blue); border: 1px solid rgba(58, 166, 255, 0.3);" onclick="testNotification()">
+        Probar Notificación
+      </button>
+    </div>
+  </div>
+
   <!-- NAVBAR INFERIOR -->
   <div class="navbar">
     <div class="nav-item active" onclick="switchTab('inicio', this)">
-      <span style="font-size:18px;">📊</span>
+      <span style="font-size:16px;">📊</span>
       <span>Inicio</span>
     </div>
     <div class="nav-item" onclick="switchTab('estudio', this)">
-      <span style="font-size:18px;">🧠</span>
+      <span style="font-size:16px;">🧠</span>
       <span>Estudio</span>
     </div>
     <div class="nav-item" onclick="switchTab('estadisticas', this)">
-      <span style="font-size:18px;">📈</span>
+      <span style="font-size:16px;">📈</span>
       <span>Métricas</span>
     </div>
     <div class="nav-item" onclick="switchTab('historial', this)">
-      <span style="font-size:18px;">📜</span>
+      <span style="font-size:16px;">📜</span>
       <span>Historial</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('ajustes', this)">
+      <span style="font-size:16px;">⚙️</span>
+      <span>Ajustes</span>
     </div>
   </div>
 
@@ -421,6 +496,8 @@
     let candleCloseTime = 0;
     let currentCandleStart = 0;
     let candlePrices = [];
+    let alertThreshold = 70;
+    let pushEnabled = false;
 
     let coinStats = JSON.parse(localStorage.getItem('btc5m_persistent_stats')) || {
       btcusdt: { hits: 0, misses: 0, abstained: 0, history: [] },
@@ -439,6 +516,40 @@
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
       element.classList.add('active');
+    }
+
+    // Actualización del Reloj UTC y Local
+    setInterval(() => {
+      const d = new Date();
+      document.getElementById('clock-utc').innerText = d.toUTCString().split(' ')[4];
+      document.getElementById('clock-local').innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      if (candleCloseTime > 0) {
+        const now = d.getTime();
+        const restSec = Math.max(0, Math.floor((candleCloseTime - now) / 1000));
+        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
+        const s = (restSec % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+      }
+    }, 1000);
+
+    function toggleNotifications(enabled) {
+      pushEnabled = enabled;
+      if (enabled && "Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    }
+
+    function updateThreshold(val) {
+      alertThreshold = parseInt(val);
+    }
+
+    function testNotification() {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("BTC 5M AI Lab Pro", { body: "¡Prueba de alerta exitosa! Las señales de alta confianza llegarán aquí." });
+      } else {
+        alert("Debes autorizar los permisos de notificación en tu celular.");
+      }
     }
 
     function initChart() {
@@ -484,17 +595,6 @@
         }
       });
     }
-
-    // Temporizador fluído
-    setInterval(() => {
-      if (candleCloseTime > 0) {
-        const now = new Date().getTime();
-        const restSec = Math.max(0, Math.floor((candleCloseTime - now) / 1000));
-        const m = Math.floor(restSec / 60).toString().padStart(2, '0');
-        const s = (restSec % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
-      }
-    }, 1000);
 
     function selectCoin(symbol, label, element) {
       document.querySelectorAll('.coin-btn').forEach(btn => btn.classList.remove('active'));
@@ -574,12 +674,11 @@
         diffElem.innerText = `${diffSign}${Math.abs(diffVal).toFixed(2)}`;
         diffElem.className = diffVal >= 0 ? "green" : "red";
 
-        // Actualizar Marcador Flotante sobre la Gráfica
+        // Marcador Flotante
         const floatTag = document.getElementById('chart-floating-price');
         floatTag.innerText = "$" + currentPrice.toFixed(dec);
         floatTag.style.background = diffVal >= 0 ? "rgba(46, 160, 67, 0.9)" : "rgba(240, 136, 62, 0.9)";
 
-        // Reiniciar datos si es nueva vela
         if (currentCandleStart !== kline.t) {
           currentCandleStart = kline.t;
           candlePrices = [];
@@ -602,7 +701,7 @@
           chart.update();
         }
 
-        // Cálculos para Botones UP / DOWN
+        // Cálculos UP / DOWN
         const diffPercent = ((currentPrice - openPrice) / openPrice) * 100;
         let upProb = Math.min(92, Math.max(8, 50 + diffPercent * 120)).toFixed(1);
         let downProb = (100 - upProb).toFixed(1);
@@ -622,11 +721,20 @@
         }
 
         let confidence = Math.max(upProb, downProb);
-        let recommendation = confidence > 65 ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
+        let recommendation = confidence >= alertThreshold ? "ENTRAR EN " + (diffPercent >= 0 ? "UP" : "DOWN") : "NO ENTRAR (ABSTENCIÓN)";
         document.getElementById('pred-recommendation').innerText = recommendation;
         document.getElementById('pred-recommendation').className = recommendation.includes("ENTRAR EN") ? "green" : "yellow";
 
-        // Guardado al cerrar vela de 5M
+        // Disparar Notificación Push si supera el umbral
+        if (pushEnabled && confidence >= alertThreshold && recommendation.includes("ENTRAR EN") && (!lastSignal || lastSignal.time !== kline.t)) {
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification(`Señal Alta Confianza (${currentLabel})`, {
+              body: `Dirección: ${diffPercent >= 0 ? 'UP' : 'DOWN'} | Confianza: ${confidence}%`
+            });
+          }
+        }
+
+        // Guardar al cerrar la vela de 5M
         if (isCandleClosed) {
           if (lastSignal) {
             let resultText = "";
